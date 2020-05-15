@@ -4,10 +4,8 @@
 
 
 import unittest
-from click.testing import CliRunner
 
 from sequence_qc import sequence_qc
-from sequence_qc import cli
 
 
 class TestSequence_qc(unittest.TestCase):
@@ -19,15 +17,11 @@ class TestSequence_qc(unittest.TestCase):
     def tearDown(self):
         """Tear down test fixtures, if any."""
 
-    def test_000_something(self):
-        """Test something."""
+    def test_calculate_noise(self):
+        """
+        Test noise calculation
 
-    def test_command_line_interface(self):
-        """Test the CLI."""
-        runner = CliRunner()
-        result = runner.invoke(cli.main)
-        assert result.exit_code == 0
-        assert 'sequence_qc.cli.main' in result.output
-        help_result = runner.invoke(cli.main, ['--help'])
-        assert help_result.exit_code == 0
-        assert '--help  Show this message and exit.' in help_result.output
+        :return:
+        """
+        noise = sequence_qc.calculate_noise('test_data/SeraCare_0-5.bam', 'test_data/test.bed', 0.002)
+        assert noise == 0.00001
