@@ -33,6 +33,7 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
     bed_file = BedTool(bed_file_path)
 
     alt_count = 0
+    # Use small number to avoid DivisionByZero
     total_count = 1e-9
 
     for region in bed_file.intervals:
@@ -62,7 +63,8 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
             filtered = filter((refbase_lower).__ne__, filtered)
             mismatches = list(filtered)
             mismatches_count = len(mismatches)
-            total_base_count = len(bases)
+            # Use small number to avoid DivisionByZero
+            total_base_count = len(bases) + 1e-9
             logger.debug("Mismatches: {}".format(str(mismatches_count)))
 
             if mismatches_count / total_base_count < noise_threshold:
