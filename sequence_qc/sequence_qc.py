@@ -1,11 +1,9 @@
-"""Main module."""
-
-
 from pysam import AlignmentFile
 from pybedtools import BedTool
+from pyfaidx import Fasta
 
 
-def calculate_noise(bam_path, bed_file_path, noise_threshold):
+def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
     """
     Create file of noise across specified regions in `bed_file` using pybedtools and pysam
 
@@ -20,23 +18,25 @@ def calculate_noise(bam_path, bed_file_path, noise_threshold):
 
     :return:
     """
-
     # todo: why do we need to use check_seq?
+    ref = Fasta(ref_fasta)
     af = AlignmentFile(bam_path, check_sq=False)
     bed_file = BedTool(bed_file_path)
 
     alt_count = 0
-    total_count = 0
+    total_count = 0e-9
 
     for region in bed_file.intervals:
         pileup = af.pileup(region.chrom.replace('chr', ''), region.start, region.stop)
 
-        # todo: get this part working
-        for position in pileup:
-            alt_count += position.A if position.A < noise_threshold else 0
-            alt_count += position.C if position.C < noise_threshold else 0
-            alt_count += position.G if position.G < noise_threshold else 0
-            alt_count += position.T if position.T < noise_threshold else 0
-            total_count += position.depth
+        for p in pileup:
+            refbase = ref[region.chrom][p.pos:p.pos + 1]
+            # todo: need this?
+            refbase = str(refbase)
+
+            bases = p.get_query_sequences()
+            mismatches = list(filter((refbase).__ne__, bases))
+            alt_count += len(mismatches)
+            total_count += len(bases)
 
     return alt_count / total_count
