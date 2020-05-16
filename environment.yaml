@@ -7,3 +7,4 @@ dependencies:
   - pysam=0.15.4
   - pybedtools=0.8.1
   - pyfaidx=0.5.8
+  - click=7.1.2

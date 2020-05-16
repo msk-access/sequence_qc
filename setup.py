@@ -34,7 +34,7 @@ setup(
     description="Package for doing various ad-hock quality control steps from MSK-ACCESS generated FASTQ or BAM files",
     entry_points={
         'console_scripts': [
-            'sequence_qc=sequence_qc.cli:main',
+            'calculate_noise=sequence_qc.cli:calculate_noise',
         ],
     },
     install_requires=requirements,
