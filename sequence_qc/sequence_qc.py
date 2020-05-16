@@ -36,12 +36,14 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
     total_count = 1e-9
 
     for region in bed_file.intervals:
+        # todo: shadows builtin chr()
         chr = region.chrom.replace('chr', '')
         start = region.start
         stop = region.stop
 
         logger.debug("Processing region {}, start: {}, end: {}".format(chr, start, stop))
-        pileup = af.pileup(chr, start, stop)
+        # todo: why do we need to use "nofilter" to get any pileups...?
+        pileup = af.pileup(chr, start, stop, stepper="nofilter")
 
         for p in pileup:
             logger.debug("Position: {}".format(p.pos))
