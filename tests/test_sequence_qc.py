@@ -21,9 +21,10 @@ class TestSequence_qc(unittest.TestCase):
         :return:
         """
         noise = sequence_qc.calculate_noise(
-            '/Users/ianjohnson/Downloads/chr1.fa',
+            'test_data/ref.fa',
             'test_data/SeraCare_0-5.bam',
             'test_data/test.bed',
             0.002
         )
-        assert noise == 0.0
+        assert noise == 0.0010989010988998913
+

@@ -7,6 +7,8 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
     """
     Create file of noise across specified regions in `bed_file` using pybedtools and pysam
 
+    :param ref_fasta: string - Path to reference fasta which will be used to compare to
+        `bam_path`.
     :param bam_path: string - Path to a BAM file which will be interrogated for noise
         level.
     :param bed_file_path: string - Path to a bed-format file with positions
@@ -24,7 +26,7 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
     bed_file = BedTool(bed_file_path)
 
     alt_count = 0
-    total_count = 0e-9
+    total_count = 1e-9
 
     for region in bed_file.intervals:
         pileup = af.pileup(region.chrom.replace('chr', ''), region.start, region.stop)
