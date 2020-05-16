@@ -1,7 +1,14 @@
+import logging
+
 from pysam import AlignmentFile
 from pybedtools import BedTool
 from pyfaidx import Fasta
 
+
+FORMAT = '%(asctime)-15s %(message)s'
+logging.basicConfig(format=FORMAT)
+logger = logging.getLogger("sequence_qc")
+logger.setLevel(logging.DEBUG)
 
 def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
     """
@@ -29,16 +36,30 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
     total_count = 1e-9
 
     for region in bed_file.intervals:
-        pileup = af.pileup(region.chrom.replace('chr', ''), region.start, region.stop)
+        chr = region.chrom.replace('chr', '')
+        start = region.start
+        stop = region.stop
+
+        logger.debug("Processing region {}, start: {}, end: {}".format(chr, start, stop))
+        pileup = af.pileup(chr, start, stop)
 
         for p in pileup:
+            logger.debug("Position: {}".format(p.pos))
+
             refbase = ref[region.chrom][p.pos:p.pos + 1]
             # todo: need this?
             refbase = str(refbase)
+            logger.debug("Ref Base: {}".format(refbase))
 
             bases = p.get_query_sequences()
+            logger.debug("Pileup: {}".format(''.join(bases)))
+
             mismatches = list(filter((refbase).__ne__, bases))
-            alt_count += len(mismatches)
-            total_count += len(bases)
+            mismatches_count = len(mismatches)
+            total_base_count = len(bases)
+            logger.debug("Mismatches: {}".format(str(mismatches_count)))
+
+            alt_count += mismatches_count
+            total_count += total_base_count
 
     return alt_count / total_count
