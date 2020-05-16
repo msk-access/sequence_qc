@@ -65,7 +65,7 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
             total_base_count = len(bases)
             logger.debug("Mismatches: {}".format(str(mismatches_count)))
 
-            if alt_count / total_count < noise_threshold:
+            if mismatches_count / total_base_count < noise_threshold:
                 alt_count += mismatches_count
                 total_count += total_base_count
 
