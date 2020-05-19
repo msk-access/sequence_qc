@@ -10,7 +10,15 @@ logging.basicConfig(format=FORMAT)
 logger = logging.getLogger("sequence_qc")
 logger.setLevel(logging.DEBUG)
 
-def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold, add_indels):
+def calculate_noise(
+    ref_fasta,
+    bam_path,
+    bed_file_path,
+    noise_threshold,
+    add_indels=False,
+    truncate=True,
+    ignore_overlaps=True,
+    flag_filter=0):
     """
     Create file of noise across specified regions in `bed_file` using pybedtools and pysam
 
@@ -20,10 +28,15 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold, add_ind
         level.
     :param bed_file_path: string - Path to a bed-format file with positions
         over which to calculate the noise level.
-    :noise_threshold: float - Upper limit to consider a position "noisy".
+    :param noise_threshold: float - Upper limit to consider a position "noisy".
         This should be a fraction between 0 and 1, which will determine whether a
         position in the supplied bed_file with any alt reads has too many to be considered
         just noise.
+
+    :param add_indels: see pysam.Pileup
+    :param truncate: see pysam.Pileup
+    :param ignore_overlaps: see pysam.Pileup
+    :param flag_filter: see pysam.Pileup
 
     :return:
     """
@@ -44,7 +57,7 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold, add_ind
 
         logger.debug("Processing region {}, start: {}, end: {}".format(chr, start, stop))
         # todo: why do we need to use "nofilter" to get any pileups...?
-        pileup = af.pileup(chr, start, stop, stepper="nofilter")
+        pileup = af.pileup(chr, start, stop, stepper="nofilter", truncate=truncate, ignore_overlaps=ignore_overlaps, flag_filter=flag_filter)
 
         for p in pileup:
             logger.debug("Position: {}".format(p.pos))
@@ -55,7 +68,7 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold, add_ind
             refbase_lower = refbase.lower()
             logger.debug("Ref Base: {}".format(refbase))
 
-            bases = p.get_query_sequences(mark_matches=False, add_indels=add_indels)
+            bases = p.get_query_sequences(add_indels=add_indels)
             logger.debug("Pileup: {}".format(''.join(bases)))
 
             # todo: instead of comparing to both upper and lowercase, try to use samtools "." and "," formatting
