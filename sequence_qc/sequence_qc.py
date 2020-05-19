@@ -10,7 +10,7 @@ logging.basicConfig(format=FORMAT)
 logger = logging.getLogger("sequence_qc")
 logger.setLevel(logging.DEBUG)
 
-def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
+def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold, add_indels):
     """
     Create file of noise across specified regions in `bed_file` using pybedtools and pysam
 
@@ -55,7 +55,7 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
             refbase_lower = refbase.lower()
             logger.debug("Ref Base: {}".format(refbase))
 
-            bases = p.get_query_sequences(mark_matches=False, add_indels=True)
+            bases = p.get_query_sequences(mark_matches=False, add_indels=add_indels)
             logger.debug("Pileup: {}".format(''.join(bases)))
 
             # todo: instead of comparing to both upper and lowercase, try to use samtools "." and "," formatting
