@@ -24,7 +24,7 @@ class TestSequence_qc(unittest.TestCase):
             'test_data/ref.fa',
             'test_data/SeraCare_0-5.bam',
             'test_data/test.bed',
-            0.002
+            0.2
         )
-        assert noise == 0.0031249999999902345
+        assert noise == 0.001098901098790002
 
