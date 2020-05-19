@@ -59,9 +59,8 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
             logger.debug("Pileup: {}".format(''.join(bases)))
 
             # todo: instead of comparing to both upper and lowercase, try to use samtools "." and "," formatting
-            filtered = filter((refbase).__ne__, bases)
-            filtered = filter((refbase_lower).__ne__, filtered)
-            mismatches = list(filtered)
+            mismatches = list(filter((refbase).__ne__, bases))
+            mismatches = list(filter((refbase_lower).__ne__, mismatches))
             mismatches = [m.upper() for m in mismatches]
             mismatches_count = len(mismatches)
             # Use small number to avoid DivisionByZero
