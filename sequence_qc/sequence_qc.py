@@ -62,6 +62,7 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
             filtered = filter((refbase).__ne__, bases)
             filtered = filter((refbase_lower).__ne__, filtered)
             mismatches = list(filtered)
+            mismatches = [m.upper() for m in mismatches]
             mismatches_count = len(mismatches)
             # Use small number to avoid DivisionByZero
             total_base_count = len(bases) + 1e-9
@@ -72,7 +73,7 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
             mismatches_G = list(filter(lambda x: x == 'G', mismatches))
             mismatches_T = list(filter(lambda x: x == 'T', mismatches))
             mismatches_all = [len(mismatches_A), len(mismatches_C), len(mismatches_G), len(mismatches_T)]
-            logger.debug("Mismatches all: {}".format(mismatches_all))
+            logger.debug("Mismatches A, C, G, T: {}".format(mismatches_all))
 
             if all([(m / total_base_count < noise_threshold) for m in mismatches_all]):
                 alt_count += mismatches_count
