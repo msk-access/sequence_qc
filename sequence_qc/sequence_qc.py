@@ -73,7 +73,7 @@ def calculate_noise(ref_fasta, bam_path, bed_file_path, noise_threshold):
             mismatches_T = list(filter(lambda x: x == 'T', mismatches))
             mismatches_all = [len(mismatches_A), len(mismatches_C), len(mismatches_G), len(mismatches_T)]
 
-            if any([(m / total_base_count < noise_threshold) for m in mismatches_all]):
+            if all([(m / total_base_count < noise_threshold) for m in mismatches_all]):
                 alt_count += mismatches_count
                 total_count += total_base_count
 
