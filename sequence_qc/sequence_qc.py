@@ -76,9 +76,12 @@ def calculate_noise(
 
             # Apply mapping quality filter
             mapping_qualities = p.get_mapping_qualities()
-            bases = [b for i, b in enumerate(bases) if mapping_qualities[i] > min_mapping_quality]
-            # Apply base quality filter
             base_qualities = p.get_query_qualities()
+            bases = [b for i, b in enumerate(bases) if mapping_qualities[i] > min_mapping_quality]
+
+            # Need to filter base qualities as well
+            base_qualities = [b for i, b in enumerate(base_qualities) if mapping_qualities[i] > min_mapping_quality]
+            # Apply base quality filter
             bases = [b for i, b in enumerate(bases) if base_qualities[i] > min_base_quality]
 
             # todo: instead of comparing to both upper and lowercase, try to use samtools "." and "," formatting
