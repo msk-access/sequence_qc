@@ -26,4 +26,4 @@ class TestSequence_qc(unittest.TestCase):
             'test_data/test.bed',
             0.2
         )
-        assert noise == 0.0012224938873930703
+        assert noise == 0.0012239902079405065

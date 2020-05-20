@@ -72,6 +72,11 @@ def calculate_noise(
             logger.debug("Ref Base: {}".format(refbase))
 
             bases = p.get_query_sequences(add_indels=add_indels)
+            # Even with using the add_indels=False, deletions will still be returned as empty strings,
+            # thus we must remove them from the bases manually
+            # todo: confirm this is correct pysam behavior
+            if not add_indels:
+                bases = list(filter(''.__ne__, bases))
             logger.debug("Pileup: {}".format(bases))
 
             # Apply mapping quality filter
