@@ -18,7 +18,9 @@ def calculate_noise(
     add_indels=False,
     truncate=True,
     ignore_overlaps=True,
-    flag_filter=0):
+    flag_filter=0,
+    min_mapping_quality=1,
+    min_base_quality=20):
     """
     Create file of noise across specified regions in `bed_file` using pybedtools and pysam
 
@@ -57,6 +59,7 @@ def calculate_noise(
 
         logger.debug("Processing region {}, start: {}, end: {}".format(chr, start, stop))
         # todo: why do we need to use "nofilter" to get any pileups...?
+        # todo: why doesn't min_mapq do anything?
         pileup = af.pileup(chr, start, stop, stepper="nofilter", truncate=truncate, ignore_overlaps=ignore_overlaps, flag_filter=flag_filter)
 
         for p in pileup:
@@ -70,6 +73,13 @@ def calculate_noise(
 
             bases = p.get_query_sequences(add_indels=add_indels)
             logger.debug("Pileup: {}".format(bases))
+
+            # Apply mapping quality filter
+            mapping_qualities = p.get_mapping_qualities()
+            bases = [b for i, b in enumerate(bases) if mapping_qualities[i] > min_mapping_quality]
+            # Apply base quality filter
+            base_qualities = p.get_query_qualities()
+            bases = [b for i, b in enumerate(bases) if base_qualities[i] > min_base_quality]
 
             # todo: instead of comparing to both upper and lowercase, try to use samtools "." and "," formatting
             mismatches = list(filter((refbase).__ne__, bases))
