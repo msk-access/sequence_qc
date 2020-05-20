@@ -69,7 +69,7 @@ def calculate_noise(
             logger.debug("Ref Base: {}".format(refbase))
 
             bases = p.get_query_sequences(add_indels=add_indels)
-            logger.debug("Pileup: {}".format(''.join(bases)))
+            logger.debug("Pileup: {}".format(bases))
 
             # todo: instead of comparing to both upper and lowercase, try to use samtools "." and "," formatting
             mismatches = list(filter((refbase).__ne__, bases))
@@ -91,4 +91,6 @@ def calculate_noise(
                 alt_count += mismatches_count
                 total_count += total_base_count
 
+    logger.debug("Alt count: {}".format(alt_count))
+    logger.debug("Total base count: {}".format(total_base_count))
     return alt_count / total_count
