@@ -110,5 +110,5 @@ def calculate_noise(
                 total_count += total_base_count
 
     logger.debug("Alt count: {}".format(alt_count))
-    logger.debug("Total base count: {}".format(total_base_count))
+    logger.debug("Total base count: {}".format(total_count))
     return alt_count / total_count
