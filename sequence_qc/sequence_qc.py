@@ -174,7 +174,7 @@ def calculate_noise_pysamstats(
             min_mapq=min_mapping_quality)
 
         for rec in position_coverage:
-            logging.debug(rec)
+            logger.debug(rec)
             nonref_bases = {'A', 'C', 'G', 'T'}
             nonref_bases.remove(rec['ref'])
 
@@ -182,5 +182,5 @@ def calculate_noise_pysamstats(
                 alt_count += rec['mismatches']
                 total_count += rec['reads_all']
 
-    logging.debug("Alt base count: {}, Total base count: {}".format(alt_count, total_count))
+    logger.debug("Alt base count: {}, Total base count: {}".format(alt_count, total_count))
     return alt_count / total_count
