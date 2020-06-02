@@ -1,4 +1,5 @@
 import logging
+import pysamstats
 
 from pysam import AlignmentFile
 from pybedtools import BedTool
@@ -9,6 +10,21 @@ FORMAT = '%(asctime)-15s %(message)s'
 logging.basicConfig(format=FORMAT)
 logger = logging.getLogger("sequence_qc")
 logger.setLevel(logging.DEBUG)
+
+
+EPSILON = 1e-9
+
+
+def load_bed_file(bed_file_path):
+    """
+    Use pybedtools to read bed file
+
+    :param bed_file_path:
+    :return:
+    """
+    return BedTool(bed_file_path)
+
+
 
 def calculate_noise(
     ref_fasta,
@@ -45,11 +61,11 @@ def calculate_noise(
     # todo: why do we need to use check_seq?
     ref = Fasta(ref_fasta)
     af = AlignmentFile(bam_path, check_sq=False)
-    bed_file = BedTool(bed_file_path)
+    bed_file = load_bed_file(bed_file_path)
 
     alt_count = 0
     # Use small number to avoid DivisionByZero
-    total_count = 1e-9
+    total_count = EPSILON
 
     for region in bed_file.intervals:
         # todo: shadows builtin chr()
@@ -95,15 +111,17 @@ def calculate_noise(
             mismatches = [m.upper() for m in mismatches]
             mismatches_count = len(mismatches)
             # Use small number to avoid DivisionByZero
-            total_base_count = len(bases) + 1e-9
+            total_base_count = len(bases) + EPSILON
             logger.debug("Mismatches: {}".format(str(mismatches_count)))
 
             mismatches_A = list(filter(lambda x: x == 'A', mismatches))
             mismatches_C = list(filter(lambda x: x == 'C', mismatches))
             mismatches_G = list(filter(lambda x: x == 'G', mismatches))
             mismatches_T = list(filter(lambda x: x == 'T', mismatches))
-            mismatches_all = [len(mismatches_A), len(mismatches_C), len(mismatches_G), len(mismatches_T)]
-            logger.debug("Mismatches A, C, G, T: {}".format(mismatches_all))
+            mismatches_D = list(filter(lambda x: x == '', mismatches))
+            mismatches_N = list(filter(lambda x: x == 'N', mismatches))
+            mismatches_all = [len(mismatches_A), len(mismatches_C), len(mismatches_G), len(mismatches_T), len(mismatches_D), len(mismatches_N)]
+            logger.debug("Mismatches A, C, G, T, D, N: {}".format(mismatches_all))
 
             if all([((m / total_base_count) < noise_threshold) for m in mismatches_all]):
                 alt_count += mismatches_count
@@ -112,3 +130,63 @@ def calculate_noise(
     logger.debug("Alt count: {}".format(alt_count))
     logger.debug("Total base count: {}".format(total_count))
     return alt_count / total_count
+
+
+def calculate_noise_pysamstats(
+    ref_fasta,
+    bam_path,
+    bed_file_path,
+    noise_threshold,
+    add_indels=False,
+    truncate=True,
+    ignore_overlaps=True,
+    flag_filter=0,
+    min_mapping_quality=1,
+    min_base_quality=20):
+    """
+    Same calculation as above, using pysamstats
+
+    :return:
+    """
+    bed_file = load_bed_file(bed_file_path)
+    mybam = AlignmentFile(bam_path)
+
+    alt_count = 0
+    total_count = EPSILON
+
+    for region in bed_file.intervals:
+        # todo: shadows builtin chr()
+        chr = region.chrom.replace('chr', '')
+        start = region.start
+        stop = region.stop
+        position_stats = pysamstats.load_coverage(mybam, chrom=chr, start=start, end=stop)
+        for rec in position_stats:
+            print(rec)
+
+        position_coverage = pysamstats.stat_coverage(mybam, chrom=chr, start=start, end=stop)
+        for rec in position_coverage:
+            print(rec)
+
+        position_coverage = pysamstats.stat_pileup(
+            'variation',
+            mybam,
+            chrom=chr,
+            start=start,
+            end=stop,
+            fafile=ref_fasta,
+            truncate=truncate,
+            max_depth=30000,
+            no_del=not add_indels,
+            min_baseq=min_base_quality,
+            min_mapq=min_mapping_quality)
+
+        for rec in position_coverage:
+            print(rec)
+            nonref_bases = {'A', 'C', 'G', 'T'}
+            nonref_bases.remove(rec['ref'])
+
+            if all([rec[r + '_pp'] / (rec['reads_all'] + EPSILON) < noise_threshold for r in nonref_bases]):
+                alt_count += rec['mismatches_pp']
+                total_count += rec['reads_pp']
+
+        return alt_count / total_count

@@ -1,8 +1,12 @@
 SeraCare_0-5.sam
 - only 10 reads from SeraCare 0.5% bam
-- introduced artificial noise:
-    - 1st read has 5bp insertion at 2nd position
-    - 6th read has 1bp deletion at 8th position
+- introduced test changes:
+    - 5bp insertion at 2nd position
+    - 1bp deletion at 8th position
+    - low mapping quality
+    - low base quality
+    - reversed insert size (todo: correct way to do this?)
+    - todo: each of 11 possible flags (+ combinations?)
 
 
 ref.fa

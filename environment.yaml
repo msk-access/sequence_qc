@@ -8,3 +8,4 @@ dependencies:
   - pybedtools=0.8.1
   - pyfaidx=0.5.8
   - click=7.1.2
+  - pysamstats=1.1.2
