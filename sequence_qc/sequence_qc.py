@@ -178,9 +178,16 @@ def calculate_noise_pysamstats(
             nonref_bases = {'A', 'C', 'G', 'T'}
             nonref_bases.remove(rec['ref'])
 
-            if all([rec[r] / (rec['reads_all'] + EPSILON) < noise_threshold for r in nonref_bases]):
+            if add_indels:
+                all_reads = rec['reads_all']
+            else:
+                # use A + C + G + T to avoid including deletions
+                all_reads = rec['A'] + rec['C'] + rec['G'] + rec['T']
+
+            all_reads_div = all_reads + EPSILON
+            if all([rec[r] / all_reads_div < noise_threshold for r in nonref_bases]):
                 alt_count += rec['mismatches']
-                total_count += rec['reads_all']
+                total_count += all_reads
 
     logger.debug("Alt base count: {}, Total base count: {}".format(alt_count, total_count))
     return alt_count / total_count
