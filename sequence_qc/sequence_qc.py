@@ -182,4 +182,5 @@ def calculate_noise_pysamstats(
                 alt_count += rec['mismatches']
                 total_count += rec['reads']
 
+    logging.debug("Alt base count: {}, Total base count: {}".format(alt_count, total_count))
     return alt_count / total_count
