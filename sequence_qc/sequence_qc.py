@@ -159,13 +159,6 @@ def calculate_noise_pysamstats(
         chr = region.chrom.replace('chr', '')
         start = region.start
         stop = region.stop
-        position_stats = pysamstats.load_coverage(mybam, chrom=chr, start=start, end=stop)
-        for rec in position_stats:
-            print(rec)
-
-        position_coverage = pysamstats.stat_coverage(mybam, chrom=chr, start=start, end=stop)
-        for rec in position_coverage:
-            print(rec)
 
         position_coverage = pysamstats.stat_pileup(
             'variation',
@@ -189,4 +182,4 @@ def calculate_noise_pysamstats(
                 alt_count += rec['mismatches_pp']
                 total_count += rec['reads_pp']
 
-        return alt_count / total_count
+    return alt_count / total_count
