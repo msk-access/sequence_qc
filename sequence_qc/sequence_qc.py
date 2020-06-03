@@ -75,6 +75,13 @@ def calculate_noise_pysamstats(
             non_geno_bases = ['A', 'C', 'G', 'T']
             non_geno_bases.remove(genotype)
 
+            if include_insertions:
+                non_geno_bases.append('insertions')
+            if include_deletions:
+                non_geno_bases.append('deletions')
+            if include_N:
+                non_geno_bases.append('N')
+
             all_reads = rec['A'] + rec['C'] + rec['G'] + rec['T']
 
             if include_insertions:
