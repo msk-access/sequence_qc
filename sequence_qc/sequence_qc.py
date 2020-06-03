@@ -32,6 +32,7 @@ def calculate_noise(
     bed_file_path,
     noise_threshold,
     add_indels=False,
+    include_N=False,
     truncate=True,
     ignore_overlaps=True,
     flag_filter=0,
@@ -95,6 +96,9 @@ def calculate_noise(
                 bases = list(filter(''.__ne__, bases))
             logger.debug("Pileup: {}".format(bases))
 
+            if not include_N:
+                bases = list(filter('N'.__ne__, bases))
+
             # Apply mapping quality filter
             mapping_qualities = p.get_mapping_qualities()
             base_qualities = p.get_query_qualities()
@@ -118,12 +122,14 @@ def calculate_noise(
             mismatches_C = list(filter(lambda x: x == 'C', mismatches))
             mismatches_G = list(filter(lambda x: x == 'G', mismatches))
             mismatches_T = list(filter(lambda x: x == 'T', mismatches))
-            mismatches_D = list(filter(lambda x: x == '', mismatches))
-            mismatches_N = list(filter(lambda x: x == 'N', mismatches))
-            mismatches_all = [len(mismatches_A), len(mismatches_C), len(mismatches_G), len(mismatches_T), len(mismatches_D), len(mismatches_N)]
-            logger.debug("Mismatches A, C, G, T, D, N: {}".format(mismatches_all))
+            # mismatches_D = list(filter(lambda x: x == '', mismatches))
+            # mismatches_N = list(filter(lambda x: x == 'N', mismatches))
+            mismatches_all = [len(mismatches_A), len(mismatches_C), len(mismatches_G), len(mismatches_T)] #, len(mismatches_D), len(mismatches_N)]
+            logger.debug("Mismatches A, C, G, T: {}".format(mismatches_all))
 
             if all([((m / total_base_count) < noise_threshold) for m in mismatches_all]):
+                if mismatches_count > 0:
+                    print()
                 alt_count += mismatches_count
                 total_count += total_base_count
 

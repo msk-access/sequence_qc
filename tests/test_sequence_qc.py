@@ -26,7 +26,7 @@ class TestSequence_qc(unittest.TestCase):
             'test_data/test.bed',
             0.2
         )
-        assert noise == 0.0012269938648921687
+        assert noise == 0.0012285012283623819
 
     def test_calculate_noise_with_indels(self):
         """
@@ -41,7 +41,7 @@ class TestSequence_qc(unittest.TestCase):
             0.2,
             add_indels=True
         )
-        assert noise == 0.0036764705878207936
+        assert noise == 0.0036809815946765062
 
     def test_calculate_noise_pysamstats(self):
         """
