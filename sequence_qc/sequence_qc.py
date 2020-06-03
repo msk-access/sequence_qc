@@ -3,7 +3,6 @@ import pysamstats
 
 from pysam import AlignmentFile
 from pybedtools import BedTool
-from pyfaidx import Fasta
 
 
 FORMAT = '%(asctime)-15s %(message)s'
@@ -30,7 +29,9 @@ def calculate_noise_pysamstats(
     bam_path,
     bed_file_path,
     noise_threshold,
-    add_indels=False,
+    include_insertions=False,
+    include_deletions=False,
+    include_N=False,
     truncate=True,
     ignore_overlaps=True,
     flag_filter=0,
@@ -62,7 +63,7 @@ def calculate_noise_pysamstats(
             fafile=ref_fasta,
             truncate=truncate,
             max_depth=30000,
-            no_del=not add_indels,
+            # no_del=not add_indels,
             min_baseq=min_base_quality,
             min_mapq=min_mapping_quality)
 
@@ -74,16 +75,28 @@ def calculate_noise_pysamstats(
             non_geno_bases = ['A', 'C', 'G', 'T']
             non_geno_bases.remove(genotype)
 
-            if add_indels:
-                all_reads = rec['reads_all']
-            else:
-                # use A + C + G + T to avoid including deletions
-                all_reads = rec['A'] + rec['C'] + rec['G'] + rec['T']
+            all_reads = rec['A'] + rec['C'] + rec['G'] + rec['T']
+
+            if include_insertions:
+                all_reads += rec['insertions']
+            if include_deletions:
+                all_reads += rec['deletions']
+            if include_N:
+                all_reads += rec['N']
 
             all_reads_div = all_reads + EPSILON
 
             if all([rec[r] / all_reads_div < noise_threshold for r in non_geno_bases]):
-                alt_count += sum([rec[r] for r in non_geno_bases])
+                p_alt_count = sum([rec[r] for r in non_geno_bases])
+
+                if include_insertions:
+                    p_alt_count += rec['insertions']
+                if include_deletions:
+                    p_alt_count += rec['deletions']
+                if include_N:
+                    p_alt_count += rec['N']
+
+                alt_count += p_alt_count
                 total_count += all_reads
 
     logger.debug("Alt base count: {}, Total base count: {}".format(alt_count, total_count))
