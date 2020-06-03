@@ -181,8 +181,14 @@ def calculate_noise_pysamstats(
 
         for rec in position_coverage:
             logger.debug(rec)
-            nonref_bases = {'A', 'C', 'G', 'T'}
-            nonref_bases.remove(rec['ref'])
+            # nonref_bases = {'A', 'C', 'G', 'T'}
+            # nonref_bases.remove(rec['ref'])
+
+            all_bases_list = ['A', 'C', 'G', 'T']
+            base_counts = {'A': rec['A'], 'C': rec['C'], 'G': rec['G'], 'T': rec['T']}
+            genotype = max(base_counts, key=base_counts.get)
+            non_geno_bases = all_bases_list[:]
+            non_geno_bases.remove(genotype)
 
             if add_indels:
                 all_reads = rec['reads_all']
@@ -191,8 +197,10 @@ def calculate_noise_pysamstats(
                 all_reads = rec['A'] + rec['C'] + rec['G'] + rec['T']
 
             all_reads_div = all_reads + EPSILON
-            if all([rec[r] / all_reads_div < noise_threshold for r in nonref_bases]):
-                alt_count += sum([rec[r] for r in nonref_bases])
+            # if all([rec[r] / all_reads_div < noise_threshold for r in nonref_bases]):
+            if all([rec[r] / all_reads_div < noise_threshold for r in non_geno_bases]):
+                # alt_count += sum([rec[r] for r in nonref_bases])
+                alt_count += sum([rec[r] for r in non_geno_bases])
                 total_count += all_reads
 
     logger.debug("Alt base count: {}, Total base count: {}".format(alt_count, total_count))
