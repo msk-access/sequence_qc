@@ -33,7 +33,6 @@ def calculate_noise_pysamstats(
     include_deletions=False,
     include_N=False,
     truncate=True,
-    ignore_overlaps=True,
     flag_filter=0,
     min_mapping_quality=1,
     min_base_quality=20):
