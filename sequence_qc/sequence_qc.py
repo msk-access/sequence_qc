@@ -1,6 +1,8 @@
 import logging
 import pysamstats
 
+import pandas as pd
+
 from pysam import AlignmentFile
 from pybedtools import BedTool
 
@@ -107,3 +109,78 @@ def calculate_noise_pysamstats(
 
     logger.debug("Alt base count: {}, Total base count: {}".format(alt_count, total_count))
     return alt_count / total_count
+
+
+def calculate_noise_pandas(
+    ref_fasta,
+    bam_path,
+    bed_file_path,
+    noise_threshold,
+    include_insertions=False,
+    include_deletions=False,
+    include_N=False,
+    truncate=True,
+    flag_filter=0,
+    min_mapping_quality=1,
+    min_base_quality=20):
+    """
+
+
+    :param ref_fasta:
+    :param bam_path:
+    :param bed_file_path:
+    :param noise_threshold:
+    :param include_insertions:
+    :param include_deletions:
+    :param include_N:
+    :param truncate:
+    :param flag_filter:
+    :param min_mapping_quality:
+    :param min_base_quality:
+    :return:
+    """
+    bed_file = load_bed_file(bed_file_path)
+    bam = AlignmentFile(bam_path)
+    pileup_df_all = pd.DataFrame()
+
+    # Build data frame of all positions in bed file
+    for region in bed_file.intervals:
+        chrom = region.chrom.replace('chr', '')
+        start = region.start
+        stop = region.stop
+
+        pileup = pysamstats.load_pileup(
+            'variation',
+            bam,
+            chrom=chrom,
+            start=start,
+            end=stop,
+            fafile=ref_fasta,
+            truncate=truncate,
+            max_depth=30000,
+            # no_del=not add_indels,
+            min_baseq=min_base_quality,
+            min_mapq=min_mapping_quality)
+
+        pileup_df_all = pd.concat([pileup_df_all, pd.DataFrame(pileup)])
+
+    # Determine per-position genotype and alt count
+    total_acgt = lambda row: row['A'] + row['C'] + row['G'] + row['T']
+    pileup_df_all['total_acgt'] = pileup_df_all.apply(total_acgt, axis=1)
+    geno_lambda = lambda row: max(row['A'], row['C'], row['G'], row['T'])
+    pileup_df_all['geno_count'] = pileup_df_all.apply(geno_lambda, axis=1)
+    alt_lambda = lambda row: row['total_acgt'] - row['geno_count']
+    pileup_df_all['alt_count'] = pileup_df_all.apply(alt_lambda, axis=1)
+
+    # Filter to only noisy positions
+    noise_frac = pileup_df_all['alt_count'] / (pileup_df_all['alt_count'] + pileup_df_all['geno_count'])
+    boolv = noise_frac < noise_threshold
+    noisy_positions = pileup_df_all[boolv]
+
+    # Calculate sample noise
+    alt_count_total = noisy_positions['alt_count'].sum()
+    geno_count_total = noisy_positions['geno_count'].sum()
+    noise = alt_count_total / (alt_count_total + geno_count_total)
+
+    logger.info('Alt count, Geno count, Noise: {} {} {}'.format(alt_count_total, geno_count_total, noise))
+    return noise
