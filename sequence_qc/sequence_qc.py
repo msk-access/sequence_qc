@@ -179,7 +179,7 @@ def calculate_noise(
     # Calculate sample noise
     alt_count_total = noise_positions['alt_count'].sum()
     geno_count_total = noise_positions['geno_count'].sum()
-    noise = alt_count_total / (alt_count_total + geno_count_total)
+    noise = alt_count_total / (alt_count_total + geno_count_total + EPSILON)
 
     logger.info('Alt count, Geno count, Noise: {} {} {}'.format(alt_count_total, geno_count_total, noise))
     return noise
@@ -196,6 +196,6 @@ def apply_threshold(row, thresh):
     genotype = max(base_counts, key=base_counts.get)
     non_geno_bases = ['A', 'C', 'G', 'T']
     non_geno_bases.remove(genotype)
-    if any([row[r] / row['total_acgt'] > thresh for r in non_geno_bases]):
+    if any([row[r] / (row['total_acgt'] + EPSILON) > thresh for r in non_geno_bases]):
         return False
     return True
