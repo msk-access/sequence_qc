@@ -34,7 +34,7 @@ class TestSequence_qc(unittest.TestCase):
 
         :return:
         """
-        noise = sequence_qc.calculate_noise_pandas(
+        noise = sequence_qc.calculate_noise(
             'test_data/ref_nochr.fa',
             'test_data/SeraCare_0-5.bam',
             'test_data/test.bed',

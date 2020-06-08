@@ -173,14 +173,29 @@ def calculate_noise(
     pileup_df_all['alt_count'] = pileup_df_all.apply(alt_lambda, axis=1)
 
     # Filter to only noisy positions
-    noise_frac = pileup_df_all['alt_count'] / (pileup_df_all['alt_count'] + pileup_df_all['geno_count'])
-    boolv = noise_frac < noise_threshold
-    noisy_positions = pileup_df_all[boolv]
+    boolv = pileup_df_all.apply(apply_threshold, axis=1, thresh=noise_threshold)
+    noise_positions = pileup_df_all[boolv]
 
     # Calculate sample noise
-    alt_count_total = noisy_positions['alt_count'].sum()
-    geno_count_total = noisy_positions['geno_count'].sum()
+    alt_count_total = noise_positions['alt_count'].sum()
+    geno_count_total = noise_positions['geno_count'].sum()
     noise = alt_count_total / (alt_count_total + geno_count_total)
 
     logger.info('Alt count, Geno count, Noise: {} {} {}'.format(alt_count_total, geno_count_total, noise))
     return noise
+
+
+def apply_threshold(row, thresh):
+    """
+    Returns False if any alt allele crosses `thresh` for the given row of the pileup, True otherwise
+
+    :param row: pandas.Series - row that represents single pileup position
+    :param thresh: float - threshold past which alt allele fraction should return false
+    """
+    base_counts = {'A': row['A'], 'C': row['C'], 'G': row['G'], 'T': row['T']}
+    genotype = max(base_counts, key=base_counts.get)
+    non_geno_bases = ['A', 'C', 'G', 'T']
+    non_geno_bases.remove(genotype)
+    if any([row[r] / row['total_acgt'] > thresh for r in non_geno_bases]):
+        return False
+    return True
