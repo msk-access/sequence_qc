@@ -4,9 +4,9 @@ from sequence_qc import sequence_qc
 
 
 @click.command()
-@click.option("--ref_fasta", help="Path to reference fasta, containing all regions in bed_file")
-@click.option("--bam_file", help="Path to BAM file for calculating noise")
-@click.option("--bed_file", help="Path to BED file containing regions over which to calculate noise")
+@click.option("--ref_fasta", required=True, help="Path to reference fasta, containing all regions in bed_file")
+@click.option("--bam_file", required=True, help="Path to BAM file for calculating noise")
+@click.option("--bed_file", required=True, help="Path to BED file containing regions over which to calculate noise")
 @click.option("--threshold", default=0.02, help="Alt allele frequency past which to ignore positions from the calculation")
 @click.option("--include_insertions", default=False, help="Include bases from insertions in noise calculation")
 @click.option("--include_deletions", default=False, help="Include bases from deletions in noise calculation")
