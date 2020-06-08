@@ -23,7 +23,7 @@ def calculate_noise(ref_fasta, bam_file, bed_file, threshold, include_insertions
     :param name:
     :return:
     """
-    sample_level_noise = sequence_qc.calculate_noise_pysamstats(
+    sample_level_noise = sequence_qc.calculate_noise(
         ref_fasta=ref_fasta,
         bam_path=bam_file,
         bed_file_path=bed_file,

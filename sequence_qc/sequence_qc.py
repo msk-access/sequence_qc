@@ -111,7 +111,7 @@ def calculate_noise_pysamstats(
     return alt_count / total_count
 
 
-def calculate_noise_pandas(
+def calculate_noise(
     ref_fasta,
     bam_path,
     bed_file_path,
