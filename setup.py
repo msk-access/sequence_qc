@@ -17,8 +17,8 @@ setup_requirements = [ ]
 test_requirements = [ ]
 
 setup(
-    author="Ronak Shah",
-    author_email='rons.shah@gmail.com',
+    author="Ian Johnson",
+    author_email='ionox0@gmail.com',
     python_requires='>=3.5',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
@@ -47,7 +47,7 @@ setup(
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/rhshah/sequence_qc',
+    url='https://github.com/msk-access/sequence_qc',
     version='0.1.0',
     zip_safe=False,
 )
