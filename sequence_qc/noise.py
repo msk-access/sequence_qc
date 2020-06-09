@@ -90,8 +90,8 @@ def calculate_noise(
     boolv = pileup_df_all.apply(apply_threshold, axis=1, thresh=noise_threshold)
     noise_positions = pileup_df_all[boolv]
     # Convert bytes objects to strings so output tsv is formatted correctly
-    noise_positions['chrom'] = noise_positions['chrom'].apply(lambda s: s.decode('utf-8'))
-    noise_positions['ref'] = noise_positions['ref'].apply(lambda s: s.decode('utf-8'))
+    noise_positions.loc[:,'chrom'] = noise_positions['chrom'].apply(lambda s: s.decode('utf-8'))
+    noise_positions.loc[:,'ref'] = noise_positions['ref'].apply(lambda s: s.decode('utf-8'))
     noise_positions.to_csv(noise_output_filename, sep='\t', index=False)
 
     # Calculate sample noise
