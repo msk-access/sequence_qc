@@ -15,7 +15,7 @@ logger.setLevel(logging.DEBUG)
 
 EPSILON = 1e-9
 
-noise_output_columns = [
+output_columns = [
     'chrom',
     'pos',
     'ref',
@@ -25,6 +25,7 @@ noise_output_columns = [
     'T',
     'insertions',
     'deletions',
+    'N'
 ]
 
 
@@ -92,23 +93,35 @@ def calculate_noise(
 
         pileup_df_all = pd.concat([pileup_df_all, pd.DataFrame(pileup)])
 
+    # Convert bytes objects to strings so output tsv is formatted correctly
+    for field in ['chrom', 'ref']:
+        pileup_df_all.loc[:,field] = pileup_df_all[field].apply(lambda s: s.decode('utf-8'))
+
+    # Save the complete pileup
+    pileup_df_all[output_columns].to_csv('pileup.tsv', sep='\t', index=False)
+
     # Determine per-position genotype and alt count
     pileup_df_all = _calculate_alt_and_geno(pileup_df_all)
 
     # Include columns for ins / dels / N
     pileup_df_all = _include_indels_and_n_noise(pileup_df_all)
 
-    # Filter to only noisy positions
-    boolv = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold)
-    noise_positions = pileup_df_all[boolv]
-    # Convert bytes objects to strings so output tsv is formatted correctly
-    noise_positions.loc[:,'chrom'] = noise_positions['chrom'].apply(lambda s: s.decode('utf-8'))
-    noise_positions.loc[:,'ref'] = noise_positions['ref'].apply(lambda s: s.decode('utf-8'))
-    noise_positions[noise_output_columns].to_csv(noise_output_filename, sep='\t', index=False)
+    # Filter to only positions below noise threshold
+    thresh_boolv = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold)
+    below_thresh_positions = pileup_df_all[thresh_boolv]
+
+    # Filter again to positions with noise
+    noisy_boolv = (below_thresh_positions['mismatches'] > 0) | \
+                   (below_thresh_positions['insertions'] > 0) | \
+                    (below_thresh_positions['deletions'] > 0) | \
+                     (below_thresh_positions['N'] > 0)
+
+    noisy_positions = below_thresh_positions[noisy_boolv]
+    noisy_positions[output_columns].to_csv(noise_output_filename, sep='\t', index=False)
 
     # Calculate sample noise
-    alt_count_total = noise_positions['alt_count'].sum()
-    geno_count_total = noise_positions['geno_count'].sum()
+    alt_count_total = below_thresh_positions['alt_count'].sum()
+    geno_count_total = below_thresh_positions['geno_count'].sum()
     noise = alt_count_total / (alt_count_total + geno_count_total + EPSILON)
 
     logger.info('Alt count, Geno count, Noise: {} {} {}'.format(alt_count_total, geno_count_total, noise))
