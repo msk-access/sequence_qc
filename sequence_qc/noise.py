@@ -15,6 +15,18 @@ logger.setLevel(logging.DEBUG)
 
 EPSILON = 1e-9
 
+noise_output_columns = [
+    'chrom',
+    'pos',
+    'ref',
+    'A',
+    'C',
+    'G',
+    'T',
+    'insertions',
+    'deletions',
+]
+
 
 def load_bed_file(bed_file_path):
     """
@@ -81,18 +93,18 @@ def calculate_noise(
         pileup_df_all = pd.concat([pileup_df_all, pd.DataFrame(pileup)])
 
     # Determine per-position genotype and alt count
-    pileup_df_all = calculate_alt_and_geno(pileup_df_all)
+    pileup_df_all = _calculate_alt_and_geno(pileup_df_all)
 
     # Include columns for ins / dels / N
-    pileup_df_all = include_indels_and_N_noise(pileup_df_all)
+    pileup_df_all = _include_indels_and_n_noise(pileup_df_all)
 
     # Filter to only noisy positions
-    boolv = pileup_df_all.apply(apply_threshold, axis=1, thresh=noise_threshold)
+    boolv = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold)
     noise_positions = pileup_df_all[boolv]
     # Convert bytes objects to strings so output tsv is formatted correctly
     noise_positions.loc[:,'chrom'] = noise_positions['chrom'].apply(lambda s: s.decode('utf-8'))
     noise_positions.loc[:,'ref'] = noise_positions['ref'].apply(lambda s: s.decode('utf-8'))
-    noise_positions.to_csv(noise_output_filename, sep='\t', index=False)
+    noise_positions[noise_output_columns].to_csv(noise_output_filename, sep='\t', index=False)
 
     # Calculate sample noise
     alt_count_total = noise_positions['alt_count'].sum()
@@ -103,7 +115,7 @@ def calculate_noise(
     return noise
 
 
-def apply_threshold(row, thresh):
+def _apply_threshold(row, thresh):
     """
     Returns False if any alt allele crosses `thresh` for the given row of the pileup, True otherwise
 
@@ -119,7 +131,7 @@ def apply_threshold(row, thresh):
     return True
 
 
-def calculate_alt_and_geno(noise_df):
+def _calculate_alt_and_geno(noise_df):
     """
     Determine the genotype and alt count for each position in the `noise_df`
 
@@ -135,7 +147,7 @@ def calculate_alt_and_geno(noise_df):
     return noise_df
 
 
-def include_indels_and_N_noise(noise_df):
+def _include_indels_and_n_noise(noise_df):
     """
     Add additional columns for noise including insertions / deletions / all indels / N
 
