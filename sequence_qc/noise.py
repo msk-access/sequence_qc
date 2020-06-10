@@ -28,17 +28,6 @@ output_columns = [
     'N'
 ]
 
-
-def load_bed_file(bed_file_path):
-    """
-    Use pybedtools to read bed file
-
-    :param bed_file_path:
-    :return:
-    """
-    return BedTool(bed_file_path)
-
-
 def calculate_noise(
     ref_fasta,
     bam_path,
@@ -68,7 +57,7 @@ def calculate_noise(
     :param min_base_quality:
     :return:
     """
-    bed_file = load_bed_file(bed_file_path)
+    bed_file = _load_bed_file(bed_file_path)
     bam = AlignmentFile(bam_path)
     pileup_df_all = pd.DataFrame()
 
@@ -126,6 +115,16 @@ def calculate_noise(
 
     logger.info('Alt count, Geno count, Noise: {} {} {}'.format(alt_count_total, geno_count_total, noise))
     return noise
+
+
+def _load_bed_file(bed_file_path):
+    """
+    Use pybedtools to read bed file
+
+    :param bed_file_path:
+    :return:
+    """
+    return BedTool(bed_file_path)
 
 
 def _apply_threshold(row, thresh):
