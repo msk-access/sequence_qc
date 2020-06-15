@@ -6,8 +6,8 @@ sequence_qc
 .. image:: https://img.shields.io/pypi/v/sequence_qc.svg
         :target: https://pypi.python.org/pypi/sequence_qc
 
-.. image:: https://img.shields.io/travis/rhshah/sequence_qc.svg
-        :target: https://travis-ci.org/rhshah/sequence_qc
+.. image:: https://travis-ci.com/msk-access/sequence_qc.svg?branch=master
+        :target: https://travis-ci.com/github/msk-access/sequence_qc
 
 .. image:: https://readthedocs.org/projects/sequence-qc/badge/?version=latest
         :target: https://sequence-qc.readthedocs.io/en/latest/?badge=latest
