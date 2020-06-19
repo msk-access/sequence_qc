@@ -39,7 +39,6 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     :param noise_threshold:
     :param noise_output_filename:
     :param truncate:
-    :param flag_filter:
     :param min_mapping_quality:
     :param min_base_quality:
     :return:
@@ -104,7 +103,7 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     return noise
 
 
-def _load_bed_file(bed_file_path: str):
+def _load_bed_file(bed_file_path: str) -> BedTool:
     """
     Use pybedtools to read bed file
 
@@ -114,7 +113,7 @@ def _load_bed_file(bed_file_path: str):
     return BedTool(bed_file_path)
 
 
-def _apply_threshold(row: pd.Series, thresh: float):
+def _apply_threshold(row: pd.Series, thresh: float) -> bool:
     """
     Returns False if any alt allele crosses `thresh` for the given row of the pileup, True otherwise
 
@@ -125,28 +124,37 @@ def _apply_threshold(row: pd.Series, thresh: float):
     genotype = max(base_counts, key=base_counts.get)
     non_geno_bases = ['A', 'C', 'G', 'T']
     non_geno_bases.remove(genotype)
+
     if any([row[r] / (row['total_acgt'] + EPSILON) > thresh for r in non_geno_bases]):
         return False
+
     return True
 
 
-def _calculate_alt_and_geno(noise_df: pd.DataFrame):
+def _calculate_alt_and_geno(noise_df: pd.DataFrame) -> pd.DataFrame:
     """
     Determine the genotype and alt count for each position in the `noise_df`
 
     :param noise_df: pd.DataFrame
     :return: pd.DataFrame
     """
-    total_acgt = lambda row: row['A'] + row['C'] + row['G'] + row['T']
+    def total_acgt(row: pd.Series) -> pd.Series:
+        return row['A'] + row['C'] + row['G'] + row['T']
+
+    def geno(row: pd.Series) -> pd.Series:
+        return max(row['A'], row['C'], row['G'], row['T'])
+
+    def alt(row: pd.Series) -> pd.Series:
+        return row['total_acgt'] - row['geno_count']
+
     noise_df['total_acgt'] = noise_df.apply(total_acgt, axis=1)
-    geno_lambda = lambda row: max(row['A'], row['C'], row['G'], row['T'])
-    noise_df['geno_count'] = noise_df.apply(geno_lambda, axis=1)
-    alt_lambda = lambda row: row['total_acgt'] - row['geno_count']
-    noise_df['alt_count'] = noise_df.apply(alt_lambda, axis=1)
+    noise_df['geno_count'] = noise_df.apply(geno, axis=1)
+    noise_df['alt_count'] = noise_df.apply(alt, axis=1)
+
     return noise_df
 
 
-def _include_indels_and_n_noise(noise_df: pd.DataFrame):
+def _include_indels_and_n_noise(noise_df: pd.DataFrame) -> pd.DataFrame:
     """
     Add additional columns for noise including insertions / deletions / all indels / N
 
@@ -155,29 +163,42 @@ def _include_indels_and_n_noise(noise_df: pd.DataFrame):
     :return:
     """
     # 1. Noise including insertions as possible genotype or alt allele
+    def geno_ins(row: pd.Series) -> pd.Series:
+        return max(row['A'], row['C'], row['G'], row['T'], row['insertions'])
+
+    def alt_ins(row: pd.Series) -> pd.Series:
+        return row['total_acgt_ins'] - row['geno_count_ins']
+
     noise_df['total_acgt_ins'] = noise_df['total_acgt'] + noise_df['insertions']
-    geno_lambda = lambda row: max(row['A'], row['C'], row['G'], row['T'], row['insertions'])
-    noise_df['geno_count_ins'] = noise_df.apply(geno_lambda, axis=1)
-    alt_lambda = lambda row: row['total_acgt_ins'] - row['geno_count_ins']
-    noise_df['alt_count_ins'] = noise_df.apply(alt_lambda, axis=1)
+    noise_df['geno_count_ins'] = noise_df.apply(geno_ins, axis=1)
+    noise_df['alt_count_ins'] = noise_df.apply(alt_ins, axis=1)
 
     # 2. Noise including deletions as possible genotype or alt allele
-    noise_df['total_acgt_del'] = noise_df['total_acgt'] + noise_df['deletions']
-    geno_lambda = lambda row: max(row['A'], row['C'], row['G'], row['T'], row['deletions'])
-    noise_df['geno_count_del'] = noise_df.apply(geno_lambda, axis=1)
-    alt_lambda = lambda row: row['total_acgt_del'] - row['geno_count_del']
-    noise_df['alt_count_del'] = noise_df.apply(alt_lambda, axis=1)
+    def geno_del(row: pd.Series) -> pd.Series:
+        return max(row['A'], row['C'], row['G'], row['T'], row['deletions'])
 
-    # 3. Noise including insertions and deletions as possible genotype (either ins or dels) or alt allele
+    def alt_del(row: pd.Series) -> pd.Series:
+        return row['total_acgt_del'] - row['geno_count_del']
+
+    noise_df['total_acgt_del'] = noise_df['total_acgt'] + noise_df['deletions']
+    noise_df['geno_count_del'] = noise_df.apply(geno_del, axis=1)
+    noise_df['alt_count_del'] = noise_df.apply(alt_del, axis=1)
+
+    # 3. Noise including insertions or deletions as possible genotype or alt allele
+    def geno_indel(row: pd.Series) -> pd.Series:
+        return max(row['A'], row['C'], row['G'], row['T'], row['insertions'], row['deletions'])
+
+    def alt_indel(row: pd.Series) -> pd.Series:
+        return row['total_acgt_indel'] - row['geno_count_del']
+
     noise_df['total_acgt_indel'] = noise_df['total_acgt'] + noise_df['insertions'] + noise_df['deletions']
-    geno_lambda = lambda row: max(row['A'], row['C'], row['G'], row['T'], row['insertions'], row['deletions'])
-    noise_df['geno_count_indel'] = noise_df.apply(geno_lambda, axis=1)
-    alt_lambda = lambda row: row['total_acgt_indel'] - row['geno_count_indel']
-    noise_df['alt_count_indel'] = noise_df.apply(alt_lambda, axis=1)
+    noise_df['geno_count_indel'] = noise_df.apply(geno_indel, axis=1)
+    noise_df['alt_count_indel'] = noise_df.apply(alt_indel, axis=1)
 
     # 4. Noise including N bases as alt allele (but won't ever be considered as genotype)
+    def alt_n(row: pd.Series) -> pd.Series:
+        return row['total_acgt_N'] - row['geno_count']
     noise_df['total_acgt_N'] = noise_df['total_acgt'] + noise_df['N']
-    alt_lambda = lambda row: row['total_acgt_N'] - row['geno_count']
-    noise_df['alt_count_N'] = noise_df.apply(alt_lambda, axis=1)
+    noise_df['alt_count_N'] = noise_df.apply(alt_n, axis=1)
 
     return noise_df
