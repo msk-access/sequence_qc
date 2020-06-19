@@ -16,7 +16,7 @@ sequence_qc
 
 
 
-Package for doing various ad-hock quality control steps from MSK-ACCESS generated FASTQ or BAM files
+Package for doing various ad-hoc quality control steps from MSK-ACCESS generated FASTQ or BAM files
 
 
 * Free software: Apache Software License 2.0
