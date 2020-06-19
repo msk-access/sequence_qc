@@ -3,7 +3,7 @@ sequence_qc
 ===========
 
 
-.. image:: https://img.shields.io/pypi/v/sequence_qc.svg
+.. image:: https://img.shields.io/pypi/v/sequence_qc.svg?
         :target: https://pypi.python.org/pypi/sequence_qc
 
 .. image:: https://travis-ci.com/msk-access/sequence_qc.svg?branch=master
