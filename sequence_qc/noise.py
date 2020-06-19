@@ -6,12 +6,10 @@ import pandas as pd
 from pysam import AlignmentFile
 from pybedtools import BedTool
 
-
 FORMAT = '%(asctime)-15s %(message)s'
 logging.basicConfig(format=FORMAT)
 logger = logging.getLogger("sequence_qc")
 logger.setLevel(logging.DEBUG)
-
 
 EPSILON = 1e-9
 
@@ -28,19 +26,10 @@ output_columns = [
     'N'
 ]
 
-def calculate_noise(
-    ref_fasta,
-    bam_path,
-    bed_file_path,
-    noise_threshold,
-    noise_output_filename='noise_positions.tsv',
-    include_insertions=False,
-    include_deletions=False,
-    include_N=False,
-    truncate=True,
-    flag_filter=0,
-    min_mapping_quality=1,
-    min_base_quality=20):
+
+def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_threshold: float,
+                    noise_output_filename: str = 'noise_positions.tsv', truncate: bool = True,
+                    min_mapping_quality: int = 1, min_base_quality: int = 20):
     """
     Create file of noise across specified regions in `bed_file` using pybedtools and pysamstats
 
@@ -48,9 +37,7 @@ def calculate_noise(
     :param bam_path:
     :param bed_file_path:
     :param noise_threshold:
-    :param include_insertions:
-    :param include_deletions:
-    :param include_N:
+    :param noise_output_filename:
     :param truncate:
     :param flag_filter:
     :param min_mapping_quality:
@@ -84,7 +71,7 @@ def calculate_noise(
 
     # Convert bytes objects to strings so output tsv is formatted correctly
     for field in ['chrom', 'ref']:
-        pileup_df_all.loc[:,field] = pileup_df_all[field].apply(lambda s: s.decode('utf-8'))
+        pileup_df_all.loc[:, field] = pileup_df_all[field].apply(lambda s: s.decode('utf-8'))
 
     # Save the complete pileup
     pileup_df_all[output_columns].to_csv('pileup.tsv', sep='\t', index=False)
@@ -101,9 +88,9 @@ def calculate_noise(
 
     # Filter again to positions with noise
     noisy_boolv = (below_thresh_positions['mismatches'] > 0) | \
-                   (below_thresh_positions['insertions'] > 0) | \
-                    (below_thresh_positions['deletions'] > 0) | \
-                     (below_thresh_positions['N'] > 0)
+                  (below_thresh_positions['insertions'] > 0) | \
+                  (below_thresh_positions['deletions'] > 0) | \
+                  (below_thresh_positions['N'] > 0)
 
     noisy_positions = below_thresh_positions[noisy_boolv]
     noisy_positions[output_columns].to_csv(noise_output_filename, sep='\t', index=False)
@@ -117,7 +104,7 @@ def calculate_noise(
     return noise
 
 
-def _load_bed_file(bed_file_path):
+def _load_bed_file(bed_file_path: str):
     """
     Use pybedtools to read bed file
 
@@ -127,7 +114,7 @@ def _load_bed_file(bed_file_path):
     return BedTool(bed_file_path)
 
 
-def _apply_threshold(row, thresh):
+def _apply_threshold(row: pd.Series, thresh: float):
     """
     Returns False if any alt allele crosses `thresh` for the given row of the pileup, True otherwise
 
@@ -143,7 +130,7 @@ def _apply_threshold(row, thresh):
     return True
 
 
-def _calculate_alt_and_geno(noise_df):
+def _calculate_alt_and_geno(noise_df: pd.DataFrame):
     """
     Determine the genotype and alt count for each position in the `noise_df`
 
@@ -159,11 +146,12 @@ def _calculate_alt_and_geno(noise_df):
     return noise_df
 
 
-def _include_indels_and_n_noise(noise_df):
+def _include_indels_and_n_noise(noise_df: pd.DataFrame):
     """
     Add additional columns for noise including insertions / deletions / all indels / N
 
-    :param noise_df: pd.DataFrame
+    :param noise_df: pd.DataFrame from pysamstats.pileup with the following columns:
+        [A, C, G, T, insertions, deletions, N]
     :return:
     """
     # 1. Noise including insertions as possible genotype or alt allele
