@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-"""The setup script."""
-
 from setuptools import setup, find_packages
+
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -10,11 +9,19 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['Click>=7.0', ]
 
-setup_requirements = [ ]
+def req_file(filename):
+    """
+    We're using a requirements.txt file so that pyup.io can use this for security checks
 
-test_requirements = [ ]
+    :param filename:
+    :return str:
+    """
+    with open(filename) as f:
+        content = f.readlines()
+        content = filter(lambda x: not x.startswith("#"), content)
+    return [x.strip() for x in content]
+
 
 setup(
     author="Ian Johnson",
@@ -31,22 +38,22 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    description="Package for doing various ad-hock quality control steps from MSK-ACCESS generated FASTQ or BAM files",
+    description="Package for doing various ad-hoc quality control steps from MSK-ACCESS generated FASTQ or BAM files",
     entry_points={
         'console_scripts': [
             'calculate_noise=sequence_qc.cli:calculate_noise',
         ],
     },
-    install_requires=requirements,
+    install_requires=req_file("requirements.txt"),
     license="Apache Software License 2.0",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='sequence_qc',
     name='sequence_qc',
     packages=find_packages(include=['sequence_qc', 'sequence_qc.*']),
-    setup_requires=setup_requirements,
+    setup_requires=req_file("requirements_dev.txt"),
     test_suite='tests',
-    tests_require=test_requirements,
+    tests_require=req_file("requirements_dev.txt"),
     url='https://github.com/msk-access/sequence_qc',
     version='0.1.0',
     zip_safe=False,
