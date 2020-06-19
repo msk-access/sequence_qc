@@ -33,17 +33,17 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     """
     Create file of noise across specified regions in `bed_file` using pybedtools and pysamstats
 
-    :param ref_fasta:
-    :param bam_path:
-    :param bed_file_path:
-    :param noise_threshold:
-    :param noise_output_filename:
-    :param truncate:
-    :param min_mapping_quality:
-    :param min_base_quality:
+    :param ref_fasta: string - path to reference fastq
+    :param bam_path: string - path to bam
+    :param bed_file_path: string - path to bed file
+    :param noise_threshold: float - threshold past which to exclude positions from noise calculation
+    :param noise_output_filename: string - filename to give output pileup
+    :param truncate: int - 0 or 1, whether to exclude reads that only partially overlap the bedfile
+    :param min_mapping_quality: int - exclude reads with mapping qualities less than this threshold
+    :param min_base_quality: int - exclude bases with less than this base quality
     :return:
     """
-    bed_file = _load_bed_file(bed_file_path)
+    bed_file = BedTool(bed_file_path)
     bam = AlignmentFile(bam_path)
     pileup_df_all = pd.DataFrame()
 
@@ -53,18 +53,9 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
         start = region.start
         stop = region.stop
 
-        pileup = pysamstats.load_pileup(
-            'variation',
-            bam,
-            chrom=chrom,
-            start=start,
-            end=stop,
-            fafile=ref_fasta,
-            truncate=truncate,
-            max_depth=30000,
-            # no_del=not add_indels,
-            min_baseq=min_base_quality,
-            min_mapq=min_mapping_quality)
+        pileup = pysamstats.load_pileup('variation', bam, chrom=chrom, start=start, end=stop, fafile=ref_fasta,
+                                        truncate=truncate, max_depth=30000, min_baseq=min_base_quality,
+                                        min_mapq=min_mapping_quality)
 
         pileup_df_all = pd.concat([pileup_df_all, pd.DataFrame(pileup)])
 
@@ -101,16 +92,6 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
 
     logger.info('Alt count, Geno count, Noise: {} {} {}'.format(alt_count_total, geno_count_total, noise))
     return noise
-
-
-def _load_bed_file(bed_file_path: str) -> BedTool:
-    """
-    Use pybedtools to read bed file
-
-    :param bed_file_path:
-    :return:
-    """
-    return BedTool(bed_file_path)
 
 
 def _apply_threshold(row: pd.Series, thresh: float) -> bool:
