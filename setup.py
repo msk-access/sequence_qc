@@ -70,7 +70,7 @@ setup(
     name='sequence_qc',
     packages=find_packages(include=['sequence_qc', 'sequence_qc.*']),
     package_data={
-        "resources": ['requirements.txt', 'requirements_dev.txt'],
+        "": ['requirements.txt', 'requirements_dev.txt'],
     },
     setup_requires=req_file("requirements_dev.txt"),
     test_suite='tests',
