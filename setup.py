@@ -23,7 +23,7 @@ def req_file(filename):
     return [x.strip() for x in content]
 
 
-def get_package_files(directory, file_type):
+def get_package_files(file_type):
     """
     helper function to recursively extract specific file types from the repository.
 
@@ -32,7 +32,7 @@ def get_package_files(directory, file_type):
     """
     paths = []
     for (path, directories, filenames) in os.walk(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), directory)
+        os.path.dirname(os.path.abspath(__file__))
     ):
         for filename in filenames:
             if not filename.endswith(file_type):
