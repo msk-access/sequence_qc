@@ -12,6 +12,8 @@ logger = logging.getLogger("sequence_qc")
 logger.setLevel(logging.DEBUG)
 
 EPSILON = 1e-9
+OUTPUT_PILEUP_NAME = 'pileup.tsv'
+OUTPUT_NOISE_FILENAME = 'noise_positions.tsv'
 
 output_columns = [
     'chrom',
@@ -28,7 +30,7 @@ output_columns = [
 
 
 def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_threshold: float,
-                    noise_output_filename: str = 'noise_positions.tsv', truncate: bool = True,
+                    noise_output_filename: str = OUTPUT_NOISE_FILENAME, truncate: bool = True,
                     min_mapping_quality: int = 1, min_base_quality: int = 20):
     """
     Create file of noise across specified regions in `bed_file` using pybedtools and pysamstats
@@ -64,7 +66,7 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
         pileup_df_all.loc[:, field] = pileup_df_all[field].apply(lambda s: s.decode('utf-8'))
 
     # Save the complete pileup
-    pileup_df_all[output_columns].to_csv('pileup.tsv', sep='\t', index=False)
+    pileup_df_all[output_columns].to_csv(OUTPUT_PILEUP_NAME, sep='\t', index=False)
 
     # Determine per-position genotype and alt count
     pileup_df_all = _calculate_alt_and_geno(pileup_df_all)
