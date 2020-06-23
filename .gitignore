@@ -1,2 +1,6 @@
 .idea
 sequence_qc/__pycache__
+.eggs/
+build/
+dist/
+sequence_qc.egg-info/

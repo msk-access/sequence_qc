@@ -23,6 +23,24 @@ def req_file(filename):
     return [x.strip() for x in content]
 
 
+def get_package_files(directory, file_type):
+    """
+    helper function to recursively extract specific file types from the repository.
+
+    :param directory, file_type:
+    :return str:
+    """
+    paths = []
+    for (path, directories, filenames) in os.walk(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), directory)
+    ):
+        for filename in filenames:
+            if not filename.endswith(file_type):
+                continue
+            paths.append(os.path.join("..", path, filename))
+    return paths
+
+
 setup(
     author="Ian Johnson",
     author_email='ionox0@gmail.com',
@@ -51,6 +69,9 @@ setup(
     keywords='sequence_qc',
     name='sequence_qc',
     packages=find_packages(include=['sequence_qc', 'sequence_qc.*']),
+    package_data={
+        "resources": get_package_files(".", (".txt", ".yaml", ".rst")),
+    },
     setup_requires=req_file("requirements_dev.txt"),
     test_suite='tests',
     tests_require=req_file("requirements_dev.txt"),
