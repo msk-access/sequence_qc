@@ -14,13 +14,11 @@ sequence_qc
         :alt: Documentation Status
 
 
-
-
 Package for doing various ad-hoc quality control steps from MSK-ACCESS generated FASTQ or BAM files
 
 
 * Free software: Apache Software License 2.0
-* Documentation: https://sequence-qc.readthedocs.io.
+* Documentation: https://msk-access.gitbook.io/sequence_qc/
 
 
 Features
@@ -28,10 +26,9 @@ Features
 
 * TODO
 
-Credits
--------
 
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
+Versioning
+----------
+To increase the version number use the following command:
 
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+``bumpversion (major|minor|patch) --tag``
