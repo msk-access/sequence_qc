@@ -13,6 +13,9 @@ sequence_qc
         :target: https://sequence-qc.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. image:: https://anaconda.org/ionox0/sequence-qc/badges/version.svg
+        :target: https://anaconda.org/ionox0/sequence-qc/badges
+        :alt: Conda
 
 Package for doing various ad-hoc quality control steps from MSK-ACCESS generated FASTQ or BAM files
 
