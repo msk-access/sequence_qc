@@ -27,9 +27,11 @@ Package for doing various ad-hoc quality control steps from MSK-ACCESS generated
 Installation
 ------------
 From pypi:
+
 ``pip install sequence_qc``
 
-From conda
+From conda:
+
 ``conda install -c ionox0 -c conda-forge -c bioconda sequence-qc``
 
 Usage
