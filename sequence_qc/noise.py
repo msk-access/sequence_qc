@@ -146,39 +146,28 @@ def _include_indels_and_n_noise(noise_df: pd.DataFrame) -> pd.DataFrame:
     def geno_ins(row: pd.Series) -> pd.Series:
         return max(row['A'], row['C'], row['G'], row['T'], row['insertions'])
 
-    def alt_ins(row: pd.Series) -> pd.Series:
-        return row['total_acgt_ins'] - row['geno_count_ins']
-
     noise_df['total_acgt_ins'] = noise_df['total_acgt'] + noise_df['insertions']
     noise_df['geno_count_ins'] = noise_df.apply(geno_ins, axis=1)
-    noise_df['alt_count_ins'] = noise_df.apply(alt_ins, axis=1)
+    noise_df['alt_count_ins'] = noise_df['total_acgt_ins'] - noise_df['geno_count_ins']
 
     # 2. Noise including deletions as possible genotype or alt allele
     def geno_del(row: pd.Series) -> pd.Series:
         return max(row['A'], row['C'], row['G'], row['T'], row['deletions'])
 
-    def alt_del(row: pd.Series) -> pd.Series:
-        return row['total_acgt_del'] - row['geno_count_del']
-
     noise_df['total_acgt_del'] = noise_df['total_acgt'] + noise_df['deletions']
     noise_df['geno_count_del'] = noise_df.apply(geno_del, axis=1)
-    noise_df['alt_count_del'] = noise_df.apply(alt_del, axis=1)
+    noise_df['alt_count_del'] = noise_df['total_acgt_del'] - noise_df['geno_count_del']
 
     # 3. Noise including insertions or deletions as possible genotype or alt allele
     def geno_indel(row: pd.Series) -> pd.Series:
         return max(row['A'], row['C'], row['G'], row['T'], row['insertions'], row['deletions'])
 
-    def alt_indel(row: pd.Series) -> pd.Series:
-        return row['total_acgt_indel'] - row['geno_count_del']
-
     noise_df['total_acgt_indel'] = noise_df['total_acgt'] + noise_df['insertions'] + noise_df['deletions']
     noise_df['geno_count_indel'] = noise_df.apply(geno_indel, axis=1)
-    noise_df['alt_count_indel'] = noise_df.apply(alt_indel, axis=1)
+    noise_df['alt_count_indel'] = noise_df['total_acgt_indel'] - noise_df['geno_count_indel']
 
     # 4. Noise including N bases as alt allele (but won't ever be considered as genotype)
-    def alt_n(row: pd.Series) -> pd.Series:
-        return row['total_acgt_N'] - row['geno_count']
     noise_df['total_acgt_N'] = noise_df['total_acgt'] + noise_df['N']
-    noise_df['alt_count_N'] = noise_df.apply(alt_n, axis=1)
+    noise_df['alt_count_N'] = noise_df['total_acgt_N'] - noise_df['geno_count']
 
     return noise_df
