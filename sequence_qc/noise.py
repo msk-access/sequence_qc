@@ -31,13 +31,14 @@ output_columns = [
 
 def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_threshold: float,
                     noise_output_filename: str = OUTPUT_NOISE_FILENAME, truncate: bool = True,
-                    min_mapping_quality: int = 1, min_base_quality: int = 20):
+                    min_mapping_quality: int = 1, min_base_quality: int = 20, output_prefix: str = '',):
     """
     Create file of noise across specified regions in `bed_file` using pybedtools and pysamstats
 
     :param ref_fasta: string - path to reference fastq
     :param bam_path: string - path to bam
     :param bed_file_path: string - path to bed file
+    :param output_prefix: string - prefix for output files
     :param noise_threshold: float - threshold past which to exclude positions from noise calculation
     :param noise_output_filename: string - filename to give output pileup
     :param truncate: int - 0 or 1, whether to exclude reads that only partially overlap the bedfile
@@ -66,7 +67,7 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
         pileup_df_all.loc[:, field] = pileup_df_all[field].apply(lambda s: s.decode('utf-8'))
 
     # Save the complete pileup
-    pileup_df_all[output_columns].to_csv(OUTPUT_PILEUP_NAME, sep='\t', index=False)
+    pileup_df_all[output_columns].to_csv(output_prefix + OUTPUT_PILEUP_NAME, sep='\t', index=False)
 
     # Determine per-position genotype and alt count
     pileup_df_all = _calculate_alt_and_geno(pileup_df_all)
@@ -86,7 +87,7 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
 
     noisy_positions = below_thresh_positions[noisy_boolv]
     noisy_positions = noisy_positions.sort_values('alt_count')
-    noisy_positions[output_columns].to_csv(noise_output_filename, sep='\t', index=False)
+    noisy_positions[output_columns].to_csv(output_prefix + noise_output_filename, sep='\t', index=False)
 
     # Calculate sample noise
     alt_count_total = below_thresh_positions['alt_count'].sum()
