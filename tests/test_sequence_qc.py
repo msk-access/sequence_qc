@@ -19,7 +19,7 @@ def test_calculate_noise():
         'test_data/test.bed',
         0.2
     )
-    assert noise == approx(0.001228501228, rel=1e-6)
+    assert noise == approx(0.0012269938650291694, rel=1e-6)
 
     for filename in [OUTPUT_NOISE_FILENAME, OUTPUT_PILEUP_NAME]:
         assert os.path.exists(filename)
