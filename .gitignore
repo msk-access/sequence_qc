@@ -1,5 +1,6 @@
 .idea
 sequence_qc/__pycache__
+tests/__pycache__
 .eggs/
 build/
 dist/

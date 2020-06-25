@@ -29,8 +29,7 @@ output_columns = [
 ]
 
 
-def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_threshold: float,
-                    noise_output_filename: str = OUTPUT_NOISE_FILENAME, truncate: bool = True,
+def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_threshold: float, truncate: bool = True,
                     min_mapping_quality: int = 1, min_base_quality: int = 1, output_prefix: str = '',):
     """
     Create file of noise across specified regions in `bed_file` using pybedtools and pysamstats
@@ -40,7 +39,6 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     :param bed_file_path: string - path to bed file
     :param output_prefix: string - prefix for output files
     :param noise_threshold: float - threshold past which to exclude positions from noise calculation
-    :param noise_output_filename: string - filename to give output pileup
     :param truncate: int - 0 or 1, whether to exclude reads that only partially overlap the bedfile
     :param min_mapping_quality: int - exclude reads with mapping qualities less than this threshold
     :param min_base_quality: int - exclude bases with less than this base quality
@@ -79,16 +77,8 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     thresh_boolv = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold)
     below_thresh_positions = pileup_df_all[thresh_boolv]
 
-    # Filter again to positions with noise
-    noisy_boolv = (below_thresh_positions['alt_count'] > 0) | \
-                  (below_thresh_positions['insertions'] > 0) | \
-                  (below_thresh_positions['deletions'] > 0) | \
-                  (below_thresh_positions['N'] > 0)
-
-    noisy_positions = below_thresh_positions[noisy_boolv]
-    noisy_positions = noisy_positions.sort_values('alt_count')
-    relevant_cols = output_columns + ['alt_count', 'geno_count']
-    noisy_positions[relevant_cols].to_csv(output_prefix + noise_output_filename, sep='\t', index=False)
+    # Make a file of all noisy positions
+    _create_noisy_positions_file(below_thresh_positions, output_prefix)
 
     # Calculate sample noise
     alt_count_total = below_thresh_positions['alt_count'].sum()
@@ -97,6 +87,21 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
 
     logger.info('Alt count, Geno count, Noise: {} {} {}'.format(alt_count_total, geno_count_total, noise))
     return noise
+
+
+def _create_noisy_positions_file(pileup_df: pd.DataFrame, output_prefix: str = '') -> None:
+    """
+    Filter to only positions with noise and save to a tsv
+    """
+    noisy_boolv = (pileup_df['alt_count'] > 0) | \
+                  (pileup_df['insertions'] > 0) | \
+                  (pileup_df['deletions'] > 0) | \
+                  (pileup_df['N'] > 0)
+
+    noisy_positions = pileup_df[noisy_boolv]
+    noisy_positions = noisy_positions.sort_values('alt_count')
+    relevant_cols = output_columns + ['alt_count', 'geno_count']
+    noisy_positions[relevant_cols].to_csv(output_prefix + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
 
 
 def _apply_threshold(row: pd.Series, thresh: float) -> bool:
