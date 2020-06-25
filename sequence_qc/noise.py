@@ -100,8 +100,7 @@ def _create_noisy_positions_file(pileup_df: pd.DataFrame, output_prefix: str = '
 
     noisy_positions = pileup_df[noisy_boolv]
     noisy_positions = noisy_positions.sort_values('alt_count')
-    relevant_cols = output_columns + ['alt_count', 'geno_count']
-    noisy_positions[relevant_cols].to_csv(output_prefix + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
+    noisy_positions.to_csv(output_prefix + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
 
 
 def _apply_threshold(row: pd.Series, thresh: float) -> bool:
@@ -137,28 +136,18 @@ def _calculate_alt_and_geno(noise_df: pd.DataFrame) -> pd.DataFrame:
 
 def _include_indels_and_n_noise(noise_df: pd.DataFrame) -> pd.DataFrame:
     """
-    Add additional columns for noise including insertions / deletions / all indels / N
+    Add additional columns for noise including deletions / N
 
     :param noise_df: pd.DataFrame from pysamstats.pileup with the following columns:
         [A, C, G, T, insertions, deletions, N]
     :return:
     """
-    # 1. Noise including insertions as possible genotype or alt allele
-    noise_df['total_acgt_ins'] = noise_df['total_acgt'] + noise_df['insertions']
-    noise_df['geno_count_ins'] = noise_df[['A', 'C', 'G', 'T', 'insertions']].max(axis=1)
-    noise_df['alt_count_ins'] = noise_df['total_acgt_ins'] - noise_df['geno_count_ins']
-
-    # 2. Noise including deletions as possible genotype or alt allele
+    # Noise including deletions as possible genotype or alt allele
     noise_df['total_acgt_del'] = noise_df['total_acgt'] + noise_df['deletions']
     noise_df['geno_count_del'] = noise_df[['A', 'C', 'G', 'T', 'deletions']].max(axis=1)
     noise_df['alt_count_del'] = noise_df['total_acgt_del'] - noise_df['geno_count_del']
 
-    # 3. Noise including insertions or deletions as possible genotype or alt allele
-    noise_df['total_acgt_indel'] = noise_df['total_acgt'] + noise_df['insertions'] + noise_df['deletions']
-    noise_df['geno_count_indel'] = noise_df[['A', 'C', 'G', 'T', 'insertions', 'deletions']].max(axis=1)
-    noise_df['alt_count_indel'] = noise_df['total_acgt_indel'] - noise_df['geno_count_indel']
-
-    # 4. Noise including N bases as alt allele (but won't ever be considered as genotype)
+    # Noise including N bases as alt allele (but won't ever be considered as genotype)
     noise_df['total_acgt_N'] = noise_df['total_acgt'] + noise_df['N']
     noise_df['alt_count_N'] = noise_df['total_acgt_N'] - noise_df['geno_count']
 
