@@ -124,16 +124,13 @@ def _calculate_alt_and_geno(noise_df: pd.DataFrame) -> pd.DataFrame:
     :param noise_df: pd.DataFrame
     :return: pd.DataFrame
     """
-    def total_acgt(row: pd.Series) -> pd.Series:
-        return row['A'] + row['C'] + row['G'] + row['T']
-
     def geno(row: pd.Series) -> pd.Series:
         return max(row['A'], row['C'], row['G'], row['T'])
 
     def alt(row: pd.Series) -> pd.Series:
         return row['total_acgt'] - row['geno_count']
 
-    noise_df['total_acgt'] = noise_df.apply(total_acgt, axis=1)
+    noise_df['total_acgt'] = noise_df['A'] + noise_df['C'] + noise_df['G'] + noise_df['T']
     noise_df['geno_count'] = noise_df.apply(geno, axis=1)
     noise_df['alt_count'] = noise_df.apply(alt, axis=1)
 
