@@ -145,7 +145,7 @@ def _include_indels_and_n_noise(noise_df: pd.DataFrame) -> pd.DataFrame:
     """
     # 1. Noise including insertions as possible genotype or alt allele
     noise_df['total_acgt_ins'] = noise_df['total_acgt'] + noise_df['insertions']
-    noise_df['geno_count_ins'] = noise_df[['A', 'C', 'G', 'T', 'insertions', 'deletions']].max(axis=1)
+    noise_df['geno_count_ins'] = noise_df[['A', 'C', 'G', 'T', 'insertions']].max(axis=1)
     noise_df['alt_count_ins'] = noise_df['total_acgt_ins'] - noise_df['geno_count_ins']
 
     # 2. Noise including deletions as possible genotype or alt allele
