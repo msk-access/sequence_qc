@@ -14,7 +14,7 @@ sequence_qc
         :alt: Documentation Status
 
 .. image:: https://anaconda.org/ionox0/sequence-qc/badges/version.svg
-        :target: https://anaconda.org/ionox0/sequence-qc/badges
+        :target: https://anaconda.org/ionox0/sequence-qc/
         :alt: Conda
 
 Package for doing various ad-hoc quality control steps from MSK-ACCESS generated FASTQ or BAM files
@@ -26,7 +26,13 @@ Package for doing various ad-hoc quality control steps from MSK-ACCESS generated
 
 Installation
 ------------
+From pypi:
+
 ``pip install sequence_qc``
+
+From conda:
+
+``conda install -c ionox0 -c conda-forge -c bioconda sequence-qc``
 
 Usage
 -----
