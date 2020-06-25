@@ -31,7 +31,7 @@ output_columns = [
 
 def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_threshold: float,
                     noise_output_filename: str = OUTPUT_NOISE_FILENAME, truncate: bool = True,
-                    min_mapping_quality: int = 1, min_base_quality: int = 20, output_prefix: str = '',):
+                    min_mapping_quality: int = 1, min_base_quality: int = 1, output_prefix: str = '',):
     """
     Create file of noise across specified regions in `bed_file` using pybedtools and pysamstats
 
