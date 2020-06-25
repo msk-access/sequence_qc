@@ -25,7 +25,7 @@ output_columns = [
     'T',
     'insertions',
     'deletions',
-    'N'
+    'N',
 ]
 
 
@@ -87,7 +87,8 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
 
     noisy_positions = below_thresh_positions[noisy_boolv]
     noisy_positions = noisy_positions.sort_values('alt_count')
-    noisy_positions[output_columns].to_csv(output_prefix + noise_output_filename, sep='\t', index=False)
+    relevant_cols = output_columns + ['alt_count', 'geno_count']
+    noisy_positions[relevant_cols].to_csv(output_prefix + noise_output_filename, sep='\t', index=False)
 
     # Calculate sample noise
     alt_count_total = below_thresh_positions['alt_count'].sum()
