@@ -80,7 +80,7 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     below_thresh_positions = pileup_df_all[thresh_boolv]
 
     # Filter again to positions with noise
-    noisy_boolv = (below_thresh_positions['mismatches'] > 0) | \
+    noisy_boolv = (below_thresh_positions['alt_count'] > 0) | \
                   (below_thresh_positions['insertions'] > 0) | \
                   (below_thresh_positions['deletions'] > 0) | \
                   (below_thresh_positions['N'] > 0)
