@@ -1,4 +1,4 @@
-# Introduction
+# sequence\_qc
 
 Package for doing various ad-hoc quality control steps from MSK-ACCESS generated FASTQ or BAM files
 
