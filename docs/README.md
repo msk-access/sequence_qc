@@ -1,10 +1,6 @@
----
-description: >-
-  Package for doing various ad-hoc quality control steps from MSK-ACCESS
-  generated FASTQ or BAM files
----
-
 # sequence\_qc
+
+Package for doing various ad-hoc quality control steps from MSK-ACCESS generated FASTQ or BAM files
 
 [![Build Status](https://travis-ci.com/msk-access/sequence_qc.svg?branch=master)](https://travis-ci.com/msk-access/sequence_qc) [![PyPi](https://img.shields.io/pypi/v/sequence_qc.svg?)](https://pypi.python.org/pypi/sequence_qc) [![Anaconda](https://anaconda.org/ionox0/sequence-qc/badges/version.svg)](https://anaconda.org/ionox0/sequence-qc/)
 
