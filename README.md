@@ -7,7 +7,7 @@ Package for doing various ad-hoc quality control steps from MSK-ACCESS generated
 [![Anaconda](https://anaconda.org/ionox0/sequence-qc/badges/version.svg)](https://anaconda.org/ionox0/sequence-qc/)
 
 * Free software: Apache Software License 2.0
-* Documentation: https://msk-access.gitbook.io/sequence_qc/
+* Documentation: https://msk-access.gitbook.io/sequence-qc/
 
 ### Installation
 
