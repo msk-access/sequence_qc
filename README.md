@@ -2,9 +2,9 @@
 
 Package for doing various ad-hoc quality control steps from MSK-ACCESS generated FASTQ or BAM files
 
-![https://travis-ci.com/github/msk-access/sequence_qc](https://travis-ci.com/msk-access/sequence_qc.svg?branch=master)
-![https://travis-ci.com/github/msk-access/sequence_qc](https://img.shields.io/pypi/v/sequence_qc.svg?)
-![https://anaconda.org/ionox0/sequence-qc/](https://anaconda.org/ionox0/sequence-qc/badges/version.svg)
+[![Build Status](https://travis-ci.com/msk-access/sequence_qc.svg?branch=master)](https://travis-ci.com/msk-access/sequence_qc)
+[![PyPi](https://img.shields.io/pypi/v/sequence_qc.svg?)](https://pypi.python.org/pypi/sequence_qc)
+[![Anaconda](https://anaconda.org/ionox0/sequence-qc/badges/version.svg)](https://anaconda.org/ionox0/sequence-qc/)
 
 * Free software: Apache Software License 2.0
 * Documentation: https://msk-access.gitbook.io/sequence_qc/
