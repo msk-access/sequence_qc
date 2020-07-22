@@ -15,6 +15,11 @@ EPSILON = 1e-9
 OUTPUT_PILEUP_NAME = 'pileup.tsv'
 OUTPUT_NOISE_FILENAME = 'noise_positions.tsv'
 
+# Output files
+NOISE_ACGT = 'noise_acgt.tsv'
+NOISE_DEL = 'noise_del.tsv'
+NOISE_ACGT_INDEL = 'noise_acgt_indel.tsv'
+NOISE_N = 'noise_n.tsv'
 # Headers for output files
 ALT_COUNT = 'alt_count'   # todo: change to minor_allele_count
 GENO_COUNT = 'geno_count' # todo: change to major_allele_count
@@ -37,7 +42,7 @@ output_columns = [
 
 
 def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_threshold: float, truncate: bool = True,
-                    min_mapping_quality: int = 1, min_base_quality: int = 1, output_prefix: str = '',):
+                    min_mapping_quality: int = 1, min_base_quality: int = 1, output_prefix: str = '',) -> float:
     """
     Create file of noise across specified regions in `bed_file` using pybedtools and pysamstats
 
@@ -78,7 +83,7 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     pileup_df_all = _calculate_alt_and_geno(pileup_df_all)
 
     # Include columns for ins / dels / N
-    pileup_df_all = _include_indels_and_n_noise(pileup_df_all)
+    pileup_df_all = _include_dels_and_n_noise(pileup_df_all)
 
     # Filter to only positions below noise threshold
     thresh_boolv = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold)
@@ -91,9 +96,29 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     alt_count_total = below_thresh_positions[ALT_COUNT].sum()
     geno_count_total = below_thresh_positions[GENO_COUNT].sum()
     noise = alt_count_total / (alt_count_total + geno_count_total + EPSILON)
+    _write_noise_files(alt_count_total, geno_count_total, noise, output_prefix)
 
     logger.info('Alt count, Geno count, Noise: {} {} {}'.format(alt_count_total, geno_count_total, noise))
     return noise
+
+
+def _write_noise_files(alt: int, geno: int, noise: float, output_prefix: str = 'sample_id') -> None:
+    """
+    Save sample noise info to file
+
+    :param alt:
+    :param geno:
+    :param noise:
+    :return:
+    """
+    pd.DataFrame({
+        SAMPLE_ID: [output_prefix],
+        ALT_COUNT: [alt],
+        GENO_COUNT: [geno],
+        NOISE_FRACTION: [noise]}
+    ).to_csv(NOISE_ACGT, sep='\t')
+
+
 
 
 def _create_noisy_positions_file(pileup_df: pd.DataFrame, output_prefix: str = '') -> None:
@@ -141,7 +166,7 @@ def _calculate_alt_and_geno(noise_df: pd.DataFrame) -> pd.DataFrame:
     return noise_df
 
 
-def _include_indels_and_n_noise(noise_df: pd.DataFrame) -> pd.DataFrame:
+def _include_dels_and_n_noise(noise_df: pd.DataFrame) -> pd.DataFrame:
     """
     Add additional columns for noise including deletions / N
 
