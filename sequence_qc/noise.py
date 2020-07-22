@@ -15,6 +15,13 @@ EPSILON = 1e-9
 OUTPUT_PILEUP_NAME = 'pileup.tsv'
 OUTPUT_NOISE_FILENAME = 'noise_positions.tsv'
 
+# Headers for output files
+ALT_COUNT = 'alt_count'   # todo: change to minor_allele_count
+GENO_COUNT = 'geno_count' # todo: change to major_allele_count
+SAMPLE_ID = 'sample_id'
+NOISE_FRACTION = 'noise_fraction'
+CONTRIBUTING_SITES = 'contributing_sites'
+
 output_columns = [
     'chrom',
     'pos',
@@ -81,8 +88,8 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     _create_noisy_positions_file(below_thresh_positions, output_prefix)
 
     # Calculate sample noise
-    alt_count_total = below_thresh_positions['alt_count'].sum()
-    geno_count_total = below_thresh_positions['geno_count'].sum()
+    alt_count_total = below_thresh_positions[ALT_COUNT].sum()
+    geno_count_total = below_thresh_positions[GENO_COUNT].sum()
     noise = alt_count_total / (alt_count_total + geno_count_total + EPSILON)
 
     logger.info('Alt count, Geno count, Noise: {} {} {}'.format(alt_count_total, geno_count_total, noise))
@@ -93,13 +100,13 @@ def _create_noisy_positions_file(pileup_df: pd.DataFrame, output_prefix: str = '
     """
     Filter to only positions with noise and save to a tsv
     """
-    noisy_boolv = (pileup_df['alt_count'] > 0) | \
+    noisy_boolv = (pileup_df[ALT_COUNT] > 0) | \
                   (pileup_df['insertions'] > 0) | \
                   (pileup_df['deletions'] > 0) | \
                   (pileup_df['N'] > 0)
 
     noisy_positions = pileup_df[noisy_boolv]
-    noisy_positions = noisy_positions.sort_values('alt_count')
+    noisy_positions = noisy_positions.sort_values(ALT_COUNT)
     noisy_positions.to_csv(output_prefix + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
 
 
@@ -129,8 +136,8 @@ def _calculate_alt_and_geno(noise_df: pd.DataFrame) -> pd.DataFrame:
     :return: pd.DataFrame
     """
     noise_df['total_acgt'] = noise_df['A'] + noise_df['C'] + noise_df['G'] + noise_df['T']
-    noise_df['geno_count'] = noise_df[['A', 'C', 'G', 'T']].max(axis=1)
-    noise_df['alt_count'] = noise_df['total_acgt'] - noise_df['geno_count']
+    noise_df[GENO_COUNT] = noise_df[['A', 'C', 'G', 'T']].max(axis=1)
+    noise_df[ALT_COUNT] = noise_df['total_acgt'] - noise_df[GENO_COUNT]
     return noise_df
 
 
