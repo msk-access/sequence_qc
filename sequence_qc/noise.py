@@ -113,9 +113,9 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     alt_count_total = below_thresh_positions[ALT_COUNT].sum()
     geno_count_total = below_thresh_positions[GENO_COUNT].sum()
     noise = alt_count_total / (alt_count_total + geno_count_total + EPSILON)
-    conributing_sites = below_thresh_positions.shape[0]
+    contributing_sites = below_thresh_positions.shape[0]
 
-    _write_noise_file(NOISE_ACGT, alt_count_total, geno_count_total, noise, conributing_sites, output_prefix)
+    _write_noise_file(NOISE_ACGT, alt_count_total, geno_count_total, noise, contributing_sites, output_prefix)
     _write_noise_file(NOISE_N, alt_count_total_n, geno_count_total_n, noise_n, contributing_sites_n, output_prefix)
     _write_noise_file(NOISE_DEL, alt_count_total_del, geno_count_total_del, noise_del, contributing_sites_del, output_prefix)
 
