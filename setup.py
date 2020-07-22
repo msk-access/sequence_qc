@@ -3,11 +3,8 @@ import os
 from setuptools import setup, find_packages
 
 
-with open('README.rst') as readme_file:
+with open('docs/README.md') as readme_file:
     readme = readme_file.read()
-
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
 
 
 def req_file(filename):
@@ -64,7 +61,7 @@ setup(
     },
     install_requires=req_file("requirements.txt"),
     license="Apache Software License 2.0",
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
     include_package_data=True,
     keywords='sequence_qc',
     name='sequence_qc',
