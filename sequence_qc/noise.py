@@ -89,6 +89,21 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     thresh_boolv = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold)
     below_thresh_positions = pileup_df_all[thresh_boolv]
 
+    # For noise from N's and Deletions
+    thresh_boolv_n = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold, with_n=True)
+    thresh_boolv_del = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold, with_del=True)
+
+    below_thresh_positions_n = pileup_df_all[thresh_boolv_n]
+    below_thresh_positions_del = pileup_df_all[thresh_boolv_del]
+
+    alt_count_total_n = below_thresh_positions_n['N'].sum()
+    geno_count_total_n = below_thresh_positions_n[GENO_COUNT].sum()
+    noise_n = alt_count_total_n / (alt_count_total_n + geno_count_total_n + EPSILON)
+
+    alt_count_total_del = below_thresh_positions_del['deletions'].sum()
+    geno_count_total_del = below_thresh_positions_del[GENO_COUNT].sum()
+    noise_del = alt_count_total_del / (alt_count_total_del + geno_count_total_del + EPSILON)
+
     # Make a file of all noisy positions
     _create_noisy_positions_file(below_thresh_positions, output_prefix)
 
@@ -96,13 +111,16 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     alt_count_total = below_thresh_positions[ALT_COUNT].sum()
     geno_count_total = below_thresh_positions[GENO_COUNT].sum()
     noise = alt_count_total / (alt_count_total + geno_count_total + EPSILON)
-    _write_noise_files(alt_count_total, geno_count_total, noise, output_prefix)
+
+    _write_noise_file(NOISE_ACGT, alt_count_total, geno_count_total, noise, output_prefix)
+    _write_noise_file(NOISE_N, alt_count_total_n, geno_count_total_n, noise_n, output_prefix)
+    _write_noise_file(NOISE_DEL, alt_count_total_del, geno_count_total_del, noise_del, output_prefix)
 
     logger.info('Alt count, Geno count, Noise: {} {} {}'.format(alt_count_total, geno_count_total, noise))
     return noise
 
 
-def _write_noise_files(alt: int, geno: int, noise: float, output_prefix: str = 'sample_id') -> None:
+def _write_noise_file(output_filename: str, alt: int, geno: int, noise: float, output_prefix: str = 'sample_id') -> None:
     """
     Save sample noise info to file
 
@@ -116,9 +134,7 @@ def _write_noise_files(alt: int, geno: int, noise: float, output_prefix: str = '
         ALT_COUNT: [alt],
         GENO_COUNT: [geno],
         NOISE_FRACTION: [noise]}
-    ).to_csv(NOISE_ACGT, sep='\t')
-
-
+    ).to_csv(output_prefix + output_filename, sep='\t', index=False)
 
 
 def _create_noisy_positions_file(pileup_df: pd.DataFrame, output_prefix: str = '') -> None:
@@ -135,7 +151,7 @@ def _create_noisy_positions_file(pileup_df: pd.DataFrame, output_prefix: str = '
     noisy_positions.to_csv(output_prefix + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
 
 
-def _apply_threshold(row: pd.Series, thresh: float) -> bool:
+def _apply_threshold(row: pd.Series, thresh: float, with_n: bool = False, with_del: bool = False) -> bool:
     """
     Returns False if any alt allele crosses `thresh` for the given row of the pileup, True otherwise
 
@@ -143,8 +159,17 @@ def _apply_threshold(row: pd.Series, thresh: float) -> bool:
     :param thresh: float - threshold past which alt allele fraction should return false
     """
     base_counts = {'A': row['A'], 'C': row['C'], 'G': row['G'], 'T': row['T']}
+    if with_del:
+        base_counts['deletions'] = row['deletions']
+    if with_n:
+        base_counts['N'] = row['N']
     genotype = max(base_counts, key=base_counts.get)
+
     non_geno_bases = ['A', 'C', 'G', 'T']
+    if with_del:
+        non_geno_bases.append('deletions')
+    if with_n:
+        non_geno_bases.append('N')
     non_geno_bases.remove(genotype)
 
     if any([row[r] / (row['total_acgt'] + EPSILON) > thresh for r in non_geno_bases]):

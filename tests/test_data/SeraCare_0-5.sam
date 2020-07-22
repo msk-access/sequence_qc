@@ -2,7 +2,7 @@
 @SQ	SN:1	LN:92
 @RG	ID:TD-seracare-5per_IGO_05500_EZ_29	PL:Illumina	PU:bc413-bc413	LB:4	SM:TD-seracare-5per_IGO_05500_EZ_29	CN:BergerLab_MSKCC
 @PG	ID:samtools	PN:samtools	PP:ABRA2	VN:1.10	CL:samtools view -h /Users/ianjohnson/Downloads/SeraCare_0-5.bam
-read_1	99	1	1	60	91M	=	89	152	NGCAAATGACTTGCTATTATTGATGGCAAATACACAGAGGAAGCCTTCGCCTGTCCTCATGTATTGGTCTCTCATGGCACTGTACTCTTCT	{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{	RG:Z:TD-seracare-5per_IGO_05500_EZ_29	NM:i:0	MQ:i:60	AS:i:91	XS:i:0
+with_n	99	1	1	60	91M	=	89	152	NGCAAATGACTTGCTATTATTGATGGCAAATACACAGAGGAAGCCTTCGCCTGTCCTCATGTATTGGTCTCTCATGGCACTGTACTCTTCT	{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{	RG:Z:TD-seracare-5per_IGO_05500_EZ_29	NM:i:0	MQ:i:60	AS:i:91	XS:i:0
 low_mapq	99	1	1	0	91M	=	89	145	CGCAAATGACTTGCTATTATTGATGGCAAATACACAGAGGAAGCCTTCGCCTGTCCTCATGTATTGGTCTCTCATGGCACTGTACTCTTCT	{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{	RG:Z:TD-seracare-5per_IGO_05500_EZ_29	NM:i:0	MQ:i:60	AS:i:91	XS:i:0
 low_basq	99	1	1	60	91M	=	89	172	CGCAAATGACTTGCTATTATTGATGGCAAATACACAGAGGAAGCCTTCGCCTGTCCTCATGTATTGGTCTCTCATGGCACTGTACTCTTCT	3{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{	RG:Z:TD-seracare-5per_IGO_05500_EZ_29	NM:i:0	MQ:i:60	AS:i:91	XS:i:0
 insertion	99	1	1	60	1M5I90M	=	89	135	CAAAAAGCAAATGACTTGCTATTATTGATGGCAAATGCACAGAGGAAGCCTTCGCCTGTCCTCATGTATTGGTCTCTCATGGCACTGTACTCTTCT	{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{	RG:Z:TD-seracare-5per_IGO_05500_EZ_29	NM:i:0	MQ:i:60	AS:i:91	XS:i:0

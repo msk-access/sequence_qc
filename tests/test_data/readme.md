@@ -1,6 +1,7 @@
 SeraCare_0-5.sam
 - only 10 reads from SeraCare 0.5% bam
-- introduced test changes:
+- introduced test changes in reads:
+    - N at first position
     - 5bp insertion at 2nd position
     - 1bp deletion at 8th position
     - low mapping quality
