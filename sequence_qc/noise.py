@@ -99,10 +99,12 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     alt_count_total_n = below_thresh_positions_n['N'].sum()
     geno_count_total_n = below_thresh_positions_n[GENO_COUNT].sum()
     noise_n = alt_count_total_n / (alt_count_total_n + geno_count_total_n + EPSILON)
+    contributing_sites_n = below_thresh_positions_n.shape[0]
 
     alt_count_total_del = below_thresh_positions_del['deletions'].sum()
     geno_count_total_del = below_thresh_positions_del[GENO_COUNT].sum()
     noise_del = alt_count_total_del / (alt_count_total_del + geno_count_total_del + EPSILON)
+    contributing_sites_del = below_thresh_positions_del.shape[0]
 
     # Make a file of all noisy positions
     _create_noisy_positions_file(below_thresh_positions, output_prefix)
@@ -111,16 +113,16 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     alt_count_total = below_thresh_positions[ALT_COUNT].sum()
     geno_count_total = below_thresh_positions[GENO_COUNT].sum()
     noise = alt_count_total / (alt_count_total + geno_count_total + EPSILON)
+    conributing_sites = below_thresh_positions.shape[0]
 
-    _write_noise_file(NOISE_ACGT, alt_count_total, geno_count_total, noise, output_prefix)
-    _write_noise_file(NOISE_N, alt_count_total_n, geno_count_total_n, noise_n, output_prefix)
-    _write_noise_file(NOISE_DEL, alt_count_total_del, geno_count_total_del, noise_del, output_prefix)
+    _write_noise_file(NOISE_ACGT, alt_count_total, geno_count_total, noise, conributing_sites, output_prefix)
+    _write_noise_file(NOISE_N, alt_count_total_n, geno_count_total_n, noise_n, contributing_sites_n, output_prefix)
+    _write_noise_file(NOISE_DEL, alt_count_total_del, geno_count_total_del, noise_del, contributing_sites_del, output_prefix)
 
-    logger.info('Alt count, Geno count, Noise: {} {} {}'.format(alt_count_total, geno_count_total, noise))
     return noise
 
 
-def _write_noise_file(output_filename: str, alt: int, geno: int, noise: float, output_prefix: str = 'sample_id') -> None:
+def _write_noise_file(output_filename: str, alt: int, geno: int, noise: float, contributing_sites, output_prefix: str = 'sample_id') -> None:
     """
     Save sample noise info to file
 
@@ -133,8 +135,9 @@ def _write_noise_file(output_filename: str, alt: int, geno: int, noise: float, o
         SAMPLE_ID: [output_prefix],
         ALT_COUNT: [alt],
         GENO_COUNT: [geno],
-        NOISE_FRACTION: [noise]}
-    ).to_csv(output_prefix + output_filename, sep='\t', index=False)
+        NOISE_FRACTION: [noise],
+        CONTRIBUTING_SITES: [contributing_sites]
+    }).to_csv(output_prefix + output_filename, sep='\t', index=False)
 
 
 def _create_noisy_positions_file(pileup_df: pd.DataFrame, output_prefix: str = '') -> None:
