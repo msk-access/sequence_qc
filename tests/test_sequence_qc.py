@@ -20,7 +20,7 @@ def test_calculate_noise():
         0.2,
         output_prefix='test_'
     )
-    assert noise == approx(0.0012269938650291694, rel=1e-6)
+    assert noise == approx(0.00245398773005833, rel=1e-6)
 
     for filename in [
             # 'test_' + OUTPUT_NOISE_FILENAME,
