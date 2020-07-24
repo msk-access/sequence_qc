@@ -82,21 +82,21 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     # Determine per-position genotype and alt count
     pileup_df_all = _calculate_alt_and_geno(pileup_df_all)
 
+    # Calculate sample noise and contributing sites for SNV / insertions
+    #
     # Filter to only positions below noise threshold
     thresh_boolv = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold)
     below_thresh_positions = pileup_df_all[thresh_boolv]
-    # For noise from Deletions
-    thresh_boolv_del = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold, with_del=True)
-    below_thresh_positions_del = pileup_df_all[thresh_boolv_del]
-
-    # Calculate sample noise and contributing sites for SNV / insertions
     noisy_positions = _create_noisy_positions_file(below_thresh_positions, output_prefix)
     noisy_positions.to_csv(output_prefix + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
     contributing_sites = noisy_positions.shape[0]
     alt_count_total = below_thresh_positions[ALT_COUNT].sum()
     geno_count_total = below_thresh_positions[GENO_COUNT].sum()
     noise = alt_count_total / (alt_count_total + geno_count_total + EPSILON)
-    # For Deletions
+
+    # For noise from Deletions
+    thresh_boolv_del = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold, with_del=True)
+    below_thresh_positions_del = pileup_df_all[thresh_boolv_del]
     noisy_positions_del = _create_noisy_positions_file(below_thresh_positions, output_prefix, use_del=True)
     contributing_sites_del = noisy_positions_del.shape[0]
     alt_count_total_del = below_thresh_positions_del['deletions'].sum()
