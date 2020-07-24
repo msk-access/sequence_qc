@@ -95,24 +95,24 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     thresh_boolv_del = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold, with_del=True)
     below_thresh_positions_del = pileup_df_all[thresh_boolv_del]
 
-    # Make a file of all noisy positions
-    _create_noisy_positions_file(below_thresh_positions, output_prefix)
-
-    # Calculate sample noise for SNV / insertions
+    # Calculate sample noise and contributing sites for SNV / insertions
+    noisy_positions = _create_noisy_positions_file(below_thresh_positions, output_prefix)
+    contributing_sites = noisy_positions.shape[0]
     alt_count_total = below_thresh_positions[ALT_COUNT].sum()
     geno_count_total = below_thresh_positions[GENO_COUNT].sum()
     noise = alt_count_total / (alt_count_total + geno_count_total + EPSILON)
-    contributing_sites = below_thresh_positions.shape[0]
     # For N's
+    noisy_positions_n = _create_noisy_positions_file(below_thresh_positions, output_prefix, use_n=True)
+    contributing_sites_n = noisy_positions_n.shape[0]
     alt_count_total_n = below_thresh_positions_n['N'].sum()
     geno_count_total_n = below_thresh_positions_n[GENO_COUNT].sum()
     noise_n = alt_count_total_n / (alt_count_total_n + geno_count_total_n + EPSILON)
-    contributing_sites_n = below_thresh_positions_n.shape[0]
     # For Deletions
+    noisy_positions_del = _create_noisy_positions_file(below_thresh_positions, output_prefix, use_del=True)
+    contributing_sites_del = noisy_positions_del.shape[0]
     alt_count_total_del = below_thresh_positions_del['deletions'].sum()
     geno_count_total_del = below_thresh_positions_del[GENO_COUNT].sum()
     noise_del = alt_count_total_del / (alt_count_total_del + geno_count_total_del + EPSILON)
-    contributing_sites_del = below_thresh_positions_del.shape[0]
 
     _write_noise_file(NOISE_ACGT, alt_count_total, geno_count_total, noise, contributing_sites, output_prefix)
     _write_noise_file(NOISE_N, alt_count_total_n, geno_count_total_n, noise_n, contributing_sites_n, output_prefix)
@@ -139,18 +139,20 @@ def _write_noise_file(output_filename: str, alt: int, geno: int, noise: float, c
     }).to_csv(output_prefix + output_filename, sep='\t', index=False)
 
 
-def _create_noisy_positions_file(pileup_df: pd.DataFrame, output_prefix: str = '') -> None:
+def _create_noisy_positions_file(pileup_df: pd.DataFrame, output_prefix: str = '', use_n: bool = False,
+                                 use_del: bool = False) -> None:
     """
     Filter to only positions with noise and save to a tsv
     """
-    noisy_boolv = (pileup_df[ALT_COUNT] > 0) | \
-                  (pileup_df['insertions'] > 0) | \
-                  (pileup_df['deletions'] > 0) | \
-                  (pileup_df['N'] > 0)
+    noisy_boolv = (pileup_df[ALT_COUNT] > 0) | (pileup_df['insertions'] > 0)
+    if use_del:
+        noisy_boolv = (pileup_df['deletions'] > 0)
+    if use_n:
+        noisy_boolv = (pileup_df['N'] > 0)
 
     noisy_positions = pileup_df[noisy_boolv]
     noisy_positions = noisy_positions.sort_values(ALT_COUNT)
-    noisy_positions.to_csv(output_prefix + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
+    return noisy_positions
 
 
 def _apply_threshold(row: pd.Series, thresh: float, with_n: bool = False, with_del: bool = False) -> bool:

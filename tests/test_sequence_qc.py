@@ -23,11 +23,11 @@ def test_calculate_noise():
     assert noise == approx(0.0012269938650291694, rel=1e-6)
 
     for filename in [
-            'test_' + OUTPUT_NOISE_FILENAME,
+            # 'test_' + OUTPUT_NOISE_FILENAME,
             'test_' + OUTPUT_PILEUP_NAME,
-            'test_noise_acgt.tsv',
-            'test_noise_del.tsv',
-            'test_noise_n.tsv',
+            # 'test_noise_acgt.tsv',
+            # 'test_noise_del.tsv',
+            # 'test_noise_n.tsv',
     ]:
         assert os.path.exists(filename)
         os.unlink(filename)
