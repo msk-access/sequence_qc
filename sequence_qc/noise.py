@@ -21,8 +21,8 @@ NOISE_DEL = 'noise_del.tsv'
 NOISE_ACGT_INDEL = 'noise_acgt_indel.tsv'
 NOISE_N = 'noise_n.tsv'
 # Headers for output files
-ALT_COUNT = 'alt_count'   # todo: change to minor_allele_count
-GENO_COUNT = 'geno_count' # todo: change to major_allele_count
+ALT_COUNT = 'minor_allele_count'
+GENO_COUNT = 'major_allele_count'
 SAMPLE_ID = 'sample_id'
 NOISE_FRACTION = 'noise_fraction'
 CONTRIBUTING_SITES = 'contributing_sites'
@@ -210,6 +210,6 @@ def _include_dels_and_n_noise(noise_df: pd.DataFrame) -> pd.DataFrame:
 
     # Noise including N bases as alt allele (but won't ever be considered as genotype)
     noise_df['total_acgt_N'] = noise_df['total_acgt'] + noise_df['N']
-    noise_df['alt_count_N'] = noise_df['total_acgt_N'] - noise_df['geno_count']
+    noise_df['alt_count_N'] = noise_df['total_acgt_N'] - noise_df[GENO_COUNT]
 
     return noise_df
