@@ -4,6 +4,10 @@ description: Generate a pileup and noise QC metrics from a Bam file
 
 # Noise Calculation
 
+## Description
+
+Noise is calculated by looking at positions from the `bed_file` for which there is no alt allele that exceeds `threshold`, and dividing the total number of non-reference bases by the total number of bases at such positions. 
+
 ## Usage:
 
 ```text
