@@ -23,9 +23,9 @@ Noise is calculated by looking at positions from the `bed_file` , and setting th
 
 ## Outputs Description
 
-* `sample_id_pileup.tsv` Pileup file of all positions listed in the bed file
-* `sample_id_noise_positions.tsv` Pileup file limited to positions with at least one alt allele below the noise threshold
-* `sample_id_noise_acgt.tsv` Noise file with the following columns \(calculated from single base changes, excluding N and deletions\):
+* `pileup.tsv` Pileup file of all positions listed in the bed file
+* `noise_positions.tsv` Pileup file limited to positions with at least one alt allele below the noise threshold
+* `noise_acgt.tsv` Noise file with the following columns \(calculated from single base changes, excluding N and deletions\):
 
 | Column | Description |
 | :--- | :--- |
@@ -35,6 +35,6 @@ Noise is calculated by looking at positions from the `bed_file` , and setting th
 | noise\_fraction | `minor_allele_count` divided by `major_allele_count` |
 | contributing\_sites | Number of unique sites that contributed to the `minor_allele_count` |
 
-* `sample_id_noise_n.tsv` This file is identical to `noise_acgt`, however in this case N is used as the `minor_allele` and other base changes are ignored
-* `sample_id_noise_del.tsv` This file is identical to `noise_acgt`, however in this case deletions are used as the `minor_allele` and other base changes are ignored
+* `noise_n.tsv` This file is identical to `noise_acgt`, however in this case N is used as the `minor_allele` and other base changes are ignored
+* `noise_del.tsv` This file is identical to `noise_acgt`, however in this case deletions are used as the `minor_allele` and other base changes are ignored
 
