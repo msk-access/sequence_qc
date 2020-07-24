@@ -82,9 +82,6 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     # Determine per-position genotype and alt count
     pileup_df_all = _calculate_alt_and_geno(pileup_df_all)
 
-    # Include columns for ins / dels / N
-    pileup_df_all = _include_dels_and_n_noise(pileup_df_all)
-
     # Filter to only positions below noise threshold
     thresh_boolv = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold)
     below_thresh_positions = pileup_df_all[thresh_boolv]
@@ -176,7 +173,11 @@ def _apply_threshold(row: pd.Series, thresh: float, with_n: bool = False, with_d
         non_geno_bases.append('N')
     non_geno_bases.remove(genotype)
 
-    if any([row[r] / (row['total_acgt'] + EPSILON) > thresh for r in non_geno_bases]):
+    tot = row['A'] + row['C'] + row['G'] + row['T']
+    if with_del:
+        tot += row['deletions']
+
+    if any([row[r] / (tot + EPSILON) > thresh for r in non_geno_bases]):
         return False
 
     return True
@@ -192,24 +193,4 @@ def _calculate_alt_and_geno(noise_df: pd.DataFrame) -> pd.DataFrame:
     noise_df['total_acgt'] = noise_df['A'] + noise_df['C'] + noise_df['G'] + noise_df['T']
     noise_df[GENO_COUNT] = noise_df[['A', 'C', 'G', 'T']].max(axis=1)
     noise_df[ALT_COUNT] = noise_df['total_acgt'] - noise_df[GENO_COUNT]
-    return noise_df
-
-
-def _include_dels_and_n_noise(noise_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Add additional columns for noise including deletions / N
-
-    :param noise_df: pd.DataFrame from pysamstats.pileup with the following columns:
-        [A, C, G, T, insertions, deletions, N]
-    :return:
-    """
-    # Noise including deletions as possible genotype or alt allele
-    noise_df['total_acgt_del'] = noise_df['total_acgt'] + noise_df['deletions']
-    noise_df['geno_count_del'] = noise_df[['A', 'C', 'G', 'T', 'deletions']].max(axis=1)
-    noise_df['alt_count_del'] = noise_df['total_acgt_del'] - noise_df['geno_count_del']
-
-    # Noise including N bases as alt allele (but won't ever be considered as genotype)
-    noise_df['total_acgt_N'] = noise_df['total_acgt'] + noise_df['N']
-    noise_df['alt_count_N'] = noise_df['total_acgt_N'] - noise_df[GENO_COUNT]
-
     return noise_df
