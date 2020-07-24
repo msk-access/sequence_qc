@@ -35,6 +35,6 @@ Noise is calculated by looking at positions from the `bed_file` , and setting th
 | noise\_fraction | `minor_allele_count` divided by `major_allele_count` |
 | contributing\_sites | Number of unique sites that contributed to the `minor_allele_count` |
 
-* `noise_n.tsv` This file is identical to `noise_acgt`, however in this case N is used as the `minor_allele` and other base changes are ignored
-* `noise_del.tsv` This file is identical to `noise_acgt`, however in this case deletions are used as the `minor_allele` and other base changes are ignored
+* `noise_n.tsv` This file is identical to `noise_acgt`, however in this case N is used as the minor\_allele and other base changes are ignored
+* `noise_del.tsv` This file is identical to `noise_acgt`, however in this case deletions are used as the minor\_allele and other base changes are ignored
 
