@@ -94,6 +94,7 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
 
     # Calculate sample noise and contributing sites for SNV / insertions
     noisy_positions = _create_noisy_positions_file(below_thresh_positions, output_prefix)
+    noisy_positions.to_csv(output_prefix + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
     contributing_sites = noisy_positions.shape[0]
     alt_count_total = below_thresh_positions[ALT_COUNT].sum()
     geno_count_total = below_thresh_positions[GENO_COUNT].sum()
