@@ -23,6 +23,8 @@ NOISE_N = 'noise_n.tsv'
 # Headers for output files
 ALT_COUNT = 'minor_allele_count'
 GENO_COUNT = 'major_allele_count'
+N_COUNT = 'n_count'
+TOTAL_BASE_COUNT = 'total_base_count'
 SAMPLE_ID = 'sample_id'
 NOISE_FRACTION = 'noise_fraction'
 CONTRIBUTING_SITES = 'contributing_sites'
@@ -113,7 +115,14 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     total_n = noisy_positions_n['N'].sum()
     total_acgt = pileup_df_all['total_acgt'].sum()
     noise_n = total_n / (total_n + total_acgt + EPSILON)
-    _write_noise_file(NOISE_N, total_n, total_acgt, noise_n, contributing_sites_n, output_prefix)
+
+    pd.DataFrame({
+        SAMPLE_ID: [output_prefix],
+        N_COUNT: [total_n],
+        TOTAL_BASE_COUNT: [total_acgt],
+        NOISE_FRACTION: [noise_n],
+        CONTRIBUTING_SITES: [contributing_sites_n]
+    }).to_csv(output_prefix + NOISE_N, sep='\t', index=False)
 
     return noise
 
