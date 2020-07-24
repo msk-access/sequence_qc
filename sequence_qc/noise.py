@@ -136,23 +136,21 @@ def _write_noise_file(output_filename: str, alt: int, geno: int, noise: float, c
     }).to_csv(output_prefix + output_filename, sep='\t', index=False)
 
 
-def _create_noisy_positions_file(pileup_df: pd.DataFrame, output_prefix: str = '', use_n: bool = False,
-                                 use_del: bool = False) -> None:
+def _create_noisy_positions_file(pileup_df: pd.DataFrame, output_prefix: str = '', use_del: bool = False) -> None:
     """
     Filter to only positions with noise and save to a tsv
     """
-    noisy_boolv = (pileup_df[ALT_COUNT] > 0) | (pileup_df['insertions'] > 0)
     if use_del:
         noisy_boolv = (pileup_df['deletions'] > 0)
-    if use_n:
-        noisy_boolv = (pileup_df['N'] > 0)
+    else:
+        noisy_boolv = (pileup_df[ALT_COUNT] > 0) | (pileup_df['insertions'] > 0)
 
     noisy_positions = pileup_df[noisy_boolv]
     noisy_positions = noisy_positions.sort_values(ALT_COUNT)
     return noisy_positions
 
 
-def _apply_threshold(row: pd.Series, thresh: float, with_n: bool = False, with_del: bool = False) -> bool:
+def _apply_threshold(row: pd.Series, thresh: float, with_del: bool = False) -> bool:
     """
     Returns False if any alt allele crosses `thresh` for the given row of the pileup, True otherwise
 
@@ -162,15 +160,11 @@ def _apply_threshold(row: pd.Series, thresh: float, with_n: bool = False, with_d
     base_counts = {'A': row['A'], 'C': row['C'], 'G': row['G'], 'T': row['T']}
     if with_del:
         base_counts['deletions'] = row['deletions']
-    if with_n:
-        base_counts['N'] = row['N']
     genotype = max(base_counts, key=base_counts.get)
 
     non_geno_bases = ['A', 'C', 'G', 'T']
     if with_del:
         non_geno_bases.append('deletions')
-    if with_n:
-        non_geno_bases.append('N')
     non_geno_bases.remove(genotype)
 
     tot = row['A'] + row['C'] + row['G'] + row['T']
