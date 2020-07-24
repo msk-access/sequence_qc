@@ -85,9 +85,6 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     # Filter to only positions below noise threshold
     thresh_boolv = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold)
     below_thresh_positions = pileup_df_all[thresh_boolv]
-    # For noise from N's
-    thresh_boolv_n = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold, with_n=True)
-    below_thresh_positions_n = pileup_df_all[thresh_boolv_n]
     # For noise from Deletions
     thresh_boolv_del = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold, with_del=True)
     below_thresh_positions_del = pileup_df_all[thresh_boolv_del]
@@ -99,12 +96,6 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     alt_count_total = below_thresh_positions[ALT_COUNT].sum()
     geno_count_total = below_thresh_positions[GENO_COUNT].sum()
     noise = alt_count_total / (alt_count_total + geno_count_total + EPSILON)
-    # For N's
-    noisy_positions_n = _create_noisy_positions_file(below_thresh_positions, output_prefix, use_n=True)
-    contributing_sites_n = noisy_positions_n.shape[0]
-    alt_count_total_n = below_thresh_positions_n['N'].sum()
-    geno_count_total_n = below_thresh_positions_n[GENO_COUNT].sum()
-    noise_n = alt_count_total_n / (alt_count_total_n + geno_count_total_n + EPSILON)
     # For Deletions
     noisy_positions_del = _create_noisy_positions_file(below_thresh_positions, output_prefix, use_del=True)
     contributing_sites_del = noisy_positions_del.shape[0]
@@ -113,8 +104,16 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     noise_del = alt_count_total_del / (alt_count_total_del + geno_count_total_del + EPSILON)
 
     _write_noise_file(NOISE_ACGT, alt_count_total, geno_count_total, noise, contributing_sites, output_prefix)
-    _write_noise_file(NOISE_N, alt_count_total_n, geno_count_total_n, noise_n, contributing_sites_n, output_prefix)
     _write_noise_file(NOISE_DEL, alt_count_total_del, geno_count_total_del, noise_del, contributing_sites_del, output_prefix)
+
+    # For N's
+    noisy_positions_n_boolv = pileup_df_all.apply(lambda row: row['N'] > 0, axis=1)
+    noisy_positions_n = pileup_df_all[noisy_positions_n_boolv]
+    contributing_sites_n = noisy_positions_n.shape[0]
+    total_n = noisy_positions_n['N'].sum()
+    total_acgt = pileup_df_all['total_acgt'].sum()
+    noise_n = total_n / (total_n + total_acgt + EPSILON)
+    _write_noise_file(NOISE_N, total_n, total_acgt, noise_n, contributing_sites_n, output_prefix)
 
     return noise
 

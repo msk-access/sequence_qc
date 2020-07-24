@@ -27,7 +27,7 @@ def test_calculate_noise():
             'test_' + OUTPUT_NOISE_FILENAME,
             'test_noise_acgt.tsv',
             'test_noise_del.tsv',
-            'test_noise_n.tsv',
+            # 'test_noise_n.tsv',
     ]:
         assert os.path.exists(filename)
         os.unlink(filename)
