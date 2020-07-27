@@ -134,8 +134,7 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise
     }).to_csv(output_prefix + NOISE_DEL, sep='\t', index=False)
 
     # For N's
-    noisy_positions_n_boolv = pileup_df_all.apply(lambda row: row['N'] > 0, axis=1)
-    noisy_positions_n = pileup_df_all[noisy_positions_n_boolv]
+    noisy_positions_n = pileup_df_all[pileup_df_all['N'] > 0]
     contributing_sites_n = noisy_positions_n.shape[0]
     total_n = noisy_positions_n['N'].sum()
     total_acgt = pileup_df_all['total_acgt'].sum()
