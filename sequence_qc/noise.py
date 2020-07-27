@@ -24,6 +24,7 @@ NOISE_N = 'noise_n.tsv'
 ALT_COUNT = 'minor_allele_count'
 GENO_COUNT = 'major_allele_count'
 N_COUNT = 'n_count'
+DEL_COUNT = 'del_count'
 TOTAL_BASE_COUNT = 'total_base_count'
 SAMPLE_ID = 'sample_id'
 NOISE_FRACTION = 'noise_fraction'
@@ -93,7 +94,6 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise
     :param pileup:
     :return:
     """
-    # Determine per-position genotype and alt count
     pileup_df_all = _calculate_alt_and_geno(pileup)
 
     # Calculate sample noise and contributing sites for SNV / insertions
@@ -108,17 +108,30 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise
     geno_count_total = below_thresh_positions[GENO_COUNT].sum()
     noise = alt_count_total / (alt_count_total + geno_count_total + EPSILON)
 
+    pd.DataFrame({
+        SAMPLE_ID: [output_prefix],
+        ALT_COUNT: [alt_count_total],
+        GENO_COUNT: [geno_count_total],
+        NOISE_FRACTION: [noise],
+        CONTRIBUTING_SITES: [contributing_sites]
+    }).to_csv(output_prefix + NOISE_ACGT, sep='\t', index=False)
+
     # For noise from Deletions
-    thresh_boolv_del = pileup_df_all.apply(_apply_threshold, axis=1, thresh=noise_threshold, with_del=True)
+    thresh_boolv_del = pileup_df_all.apply(lambda row: (row['deletions'] / (row['total_acgt'] + row['deletions'])) < noise_threshold, axis=1)
     below_thresh_positions_del = pileup_df_all[thresh_boolv_del]
     noisy_positions_del = _create_noisy_positions_file(below_thresh_positions, use_del=True)
     contributing_sites_del = noisy_positions_del.shape[0]
     alt_count_total_del = below_thresh_positions_del['deletions'].sum()
-    geno_count_total_del = below_thresh_positions_del[GENO_COUNT].sum()
-    noise_del = alt_count_total_del / (alt_count_total_del + geno_count_total_del + EPSILON)
+    total_count_del = below_thresh_positions_del['deletions'].sum() + below_thresh_positions_del['total_acgt'].sum()
+    noise_del = alt_count_total_del / (total_count_del + EPSILON)
 
-    _write_noise_file(NOISE_ACGT, alt_count_total, geno_count_total, noise, contributing_sites, output_prefix)
-    _write_noise_file(NOISE_DEL, alt_count_total_del, geno_count_total_del, noise_del, contributing_sites_del, output_prefix)
+    pd.DataFrame({
+        SAMPLE_ID: [output_prefix],
+        DEL_COUNT: [alt_count_total_del],
+        TOTAL_BASE_COUNT: [total_count_del],
+        NOISE_FRACTION: [noise_del],
+        CONTRIBUTING_SITES: [contributing_sites_del]
+    }).to_csv(output_prefix + NOISE_DEL, sep='\t', index=False)
 
     # For N's
     noisy_positions_n_boolv = pileup_df_all.apply(lambda row: row['N'] > 0, axis=1)
@@ -137,24 +150,6 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise
     }).to_csv(output_prefix + NOISE_N, sep='\t', index=False)
 
     return noise
-
-
-def _write_noise_file(output_filename: str, alt: int, geno: int, noise: float, contributing_sites, output_prefix: str = 'sample_id') -> None:
-    """
-    Save sample noise info to file
-
-    :param alt:
-    :param geno:
-    :param noise:
-    :return:
-    """
-    pd.DataFrame({
-        SAMPLE_ID: [output_prefix],
-        ALT_COUNT: [alt],
-        GENO_COUNT: [geno],
-        NOISE_FRACTION: [noise],
-        CONTRIBUTING_SITES: [contributing_sites]
-    }).to_csv(output_prefix + output_filename, sep='\t', index=False)
 
 
 def _create_noisy_positions_file(pileup_df: pd.DataFrame, use_del: bool = False) -> pd.DataFrame:
@@ -179,18 +174,12 @@ def _apply_threshold(row: pd.Series, thresh: float, with_del: bool = False) -> b
     :param thresh: float - threshold past which alt allele fraction should return false
     """
     base_counts = {'A': row['A'], 'C': row['C'], 'G': row['G'], 'T': row['T']}
-    if with_del:
-        base_counts['deletions'] = row['deletions']
     genotype = max(base_counts, key=base_counts.get)
 
     non_geno_bases = ['A', 'C', 'G', 'T']
-    if with_del:
-        non_geno_bases.append('deletions')
     non_geno_bases.remove(genotype)
 
     tot = row['A'] + row['C'] + row['G'] + row['T']
-    if with_del:
-        tot += row['deletions']
 
     if any([row[r] / (tot + EPSILON) > thresh for r in non_geno_bases]):
         return False
