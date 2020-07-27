@@ -81,8 +81,20 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     # Save the complete pileup
     pileup_df_all[output_columns].to_csv(output_prefix + OUTPUT_PILEUP_NAME, sep='\t', index=False)
 
+    # Continue with calculation
+    noise = _calculate_noise_from_pileup(pileup_df_all, output_prefix, noise_threshold)
+    return noise
+
+
+def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise_threshold: float) -> float:
+    """
+    Use the pileup to determine average noise, and create noise output files
+
+    :param pileup:
+    :return:
+    """
     # Determine per-position genotype and alt count
-    pileup_df_all = _calculate_alt_and_geno(pileup_df_all)
+    pileup_df_all = _calculate_alt_and_geno(pileup)
 
     # Calculate sample noise and contributing sites for SNV / insertions
     #
