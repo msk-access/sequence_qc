@@ -122,7 +122,7 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise
     noisy_positions_del = below_thresh_positions_del[below_thresh_positions_del['deletions'] > 0]
     contributing_sites_del = noisy_positions_del.shape[0]
     alt_count_total_del = below_thresh_positions_del['deletions'].sum()
-    total_count_del = below_thresh_positions_del['deletions'].sum() + below_thresh_positions_del['total_acgt'].sum()
+    total_count_del = alt_count_total_del + below_thresh_positions_del['total_acgt'].sum()
     noise_del = alt_count_total_del / (total_count_del + EPSILON)
 
     pd.DataFrame({
