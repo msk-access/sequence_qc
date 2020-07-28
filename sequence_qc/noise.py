@@ -119,7 +119,7 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise
     # For noise from Deletions
     thresh_boolv_del = pileup_df_all.apply(lambda row: (row['deletions'] / (row['total_acgt'] + row['deletions'])) < noise_threshold, axis=1)
     below_thresh_positions_del = pileup_df_all[thresh_boolv_del]
-    noisy_positions_del = _create_noisy_positions_file(below_thresh_positions, use_del=True)
+    noisy_positions_del = below_thresh_positions_del[below_thresh_positions_del['deletions'] > 0]
     contributing_sites_del = noisy_positions_del.shape[0]
     alt_count_total_del = below_thresh_positions_del['deletions'].sum()
     total_count_del = below_thresh_positions_del['deletions'].sum() + below_thresh_positions_del['total_acgt'].sum()
@@ -151,14 +151,11 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise
     return noise
 
 
-def _create_noisy_positions_file(pileup_df: pd.DataFrame, use_del: bool = False) -> pd.DataFrame:
+def _create_noisy_positions_file(pileup_df: pd.DataFrame) -> pd.DataFrame:
     """
     Filter to only positions with noise and save to a tsv
     """
-    if use_del:
-        noisy_boolv = (pileup_df['deletions'] > 0)
-    else:
-        noisy_boolv = (pileup_df[ALT_COUNT] > 0) | (pileup_df['insertions'] > 0)
+    noisy_boolv = (pileup_df[ALT_COUNT] > 0) | (pileup_df['insertions'] > 0)
 
     noisy_positions = pileup_df[noisy_boolv]
     noisy_positions = noisy_positions.sort_values(ALT_COUNT)
