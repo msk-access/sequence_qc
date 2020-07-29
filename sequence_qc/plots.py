@@ -25,5 +25,6 @@ def plot_top_noisy_positions(noisy_pileup_df: pd.DataFrame, output_prefix: str =
     # plt.title('Top Noisy Positions')
     # plt.savefig(TOP_NOISE_PLOT)
 
-    fig = px.bar(noisy_pileup_df, x='pos', y='noise_acgt')
+    noisy_pileup_df['chrom_pos'] = noisy_pileup_df['chrom'] + ':' + noisy_pileup_df['pos'].astype(str)
+    fig = px.bar(noisy_pileup_df, x='chrom_pos', y='noise_acgt')
     fig.write_html(output_prefix + TOP_NOISE_PLOT)
