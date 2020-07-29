@@ -29,7 +29,7 @@ Noise is calculated by looking at positions from the `bed_file` , and setting th
 
 | Column | Description |
 | :--- | :--- |
-| sample\_id | Taken from `output_prefix` parameter |
+| sample\_id | Taken from `sample_id` parameter |
 | minor\_allele\_count | Total number of bases below threshold that do not match the sample's genotype |
 | major\_allele\_count | Total number of bases from positions that meet threshold criteria that support the sample's genotype |
 | noise\_fraction | `minor_allele_count` divided by `major_allele_count` |

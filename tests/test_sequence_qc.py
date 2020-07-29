@@ -20,7 +20,7 @@ def test_calculate_noise():
         'test_data/SeraCare_0-5.bam',
         'test_data/test.bed',
         0.2,
-        output_prefix='test_'
+        sample_id='test_'
     )
     assert noise == approx(0.0012269938650291694, rel=1e-6)
 

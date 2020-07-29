@@ -46,14 +46,14 @@ output_columns = [
 
 
 def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_threshold: float, truncate: bool = True,
-                    min_mapping_quality: int = 1, min_base_quality: int = 1, output_prefix: str = '',) -> float:
+                    min_mapping_quality: int = 1, min_base_quality: int = 1, sample_id: str = '',) -> float:
     """
     Create file of noise across specified regions in `bed_file` using pybedtools and pysamstats
 
     :param ref_fasta: string - path to reference fastq
     :param bam_path: string - path to bam
     :param bed_file_path: string - path to bed file
-    :param output_prefix: string - prefix for output files
+    :param sample_id: string - prefix for output files
     :param noise_threshold: float - threshold past which to exclude positions from noise calculation
     :param truncate: int - 0 or 1, whether to exclude reads that only partially overlap the bedfile
     :param min_mapping_quality: int - exclude reads with mapping qualities less than this threshold
@@ -81,14 +81,14 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
         pileup_df_all.loc[:, field] = pileup_df_all[field].apply(lambda s: s.decode('utf-8'))
 
     # Save the complete pileup
-    pileup_df_all[output_columns].to_csv(output_prefix + OUTPUT_PILEUP_NAME, sep='\t', index=False)
+    pileup_df_all[output_columns].to_csv(sample_id + OUTPUT_PILEUP_NAME, sep='\t', index=False)
 
     # Continue with calculation
-    noise = _calculate_noise_from_pileup(pileup_df_all, output_prefix, noise_threshold)
+    noise = _calculate_noise_from_pileup(pileup_df_all, sample_id, noise_threshold)
     return noise
 
 
-def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise_threshold: float) -> float:
+def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_threshold: float) -> float:
     """
     Use the pileup to determine average noise, and create noise output files
 
@@ -106,20 +106,20 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise
     noisy_positions = below_thresh_positions[noisy_boolv]
     noisy_positions = noisy_positions.sort_values(ALT_COUNT, ascending=False)
 
-    noisy_positions.to_csv(output_prefix + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
-    plot_top_noisy_positions(noisy_positions, output_prefix)
+    noisy_positions.to_csv(sample_id + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
+    plot_top_noisy_positions(noisy_positions, sample_id)
     contributing_sites = noisy_positions.shape[0]
     alt_count_total = below_thresh_positions[ALT_COUNT].sum()
     geno_count_total = below_thresh_positions[GENO_COUNT].sum()
     noise = alt_count_total / (alt_count_total + geno_count_total + EPSILON)
 
     pd.DataFrame({
-        SAMPLE_ID: [output_prefix],
+        SAMPLE_ID: [sample_id],
         ALT_COUNT: [alt_count_total],
         GENO_COUNT: [geno_count_total],
         NOISE_FRACTION: [noise],
         CONTRIBUTING_SITES: [contributing_sites]
-    }).to_csv(output_prefix + NOISE_ACGT, sep='\t', index=False)
+    }).to_csv(sample_id + NOISE_ACGT, sep='\t', index=False)
 
     # For noise from Deletions
     thresh_lambda = lambda row: (row['deletions'] / (row['total_acgt'] + row['deletions'] + EPSILON)) < noise_threshold
@@ -132,12 +132,12 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise
     noise_del = alt_count_total_del / (total_count_del + EPSILON)
 
     pd.DataFrame({
-        SAMPLE_ID: [output_prefix],
+        SAMPLE_ID: [sample_id],
         DEL_COUNT: [alt_count_total_del],
         TOTAL_BASE_COUNT: [total_count_del],
         NOISE_FRACTION: [noise_del],
         CONTRIBUTING_SITES: [contributing_sites_del]
-    }).to_csv(output_prefix + NOISE_DEL, sep='\t', index=False)
+    }).to_csv(sample_id + NOISE_DEL, sep='\t', index=False)
 
     # For N's
     noisy_positions_n = pileup_df_all[pileup_df_all['N'] > 0]
@@ -147,12 +147,12 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise
     noise_n = total_n / (total_n + total_acgt + EPSILON)
 
     pd.DataFrame({
-        SAMPLE_ID: [output_prefix],
+        SAMPLE_ID: [sample_id],
         N_COUNT: [total_n],
         TOTAL_BASE_COUNT: [total_acgt],
         NOISE_FRACTION: [noise_n],
         CONTRIBUTING_SITES: [contributing_sites_n]
-    }).to_csv(output_prefix + NOISE_N, sep='\t', index=False)
+    }).to_csv(sample_id + NOISE_N, sep='\t', index=False)
 
     return noise
 
