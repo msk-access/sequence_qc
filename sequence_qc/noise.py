@@ -107,7 +107,7 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise
     noisy_positions = noisy_positions.sort_values(ALT_COUNT)
 
     noisy_positions.to_csv(output_prefix + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
-    plot_top_noisy_positions(noisy_positions)
+    plot_top_noisy_positions(noisy_positions, output_prefix)
     contributing_sites = noisy_positions.shape[0]
     alt_count_total = below_thresh_positions[ALT_COUNT].sum()
     geno_count_total = below_thresh_positions[GENO_COUNT].sum()

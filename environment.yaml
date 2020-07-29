@@ -11,4 +11,5 @@ dependencies:
   - click=7.1.2
   - pysamstats=1.1.2
   - pandas=1.0.3
-  - matplotlib==3.3.0
+#  - matplotlib==3.3.0
+  - plotly==4.9.0
