@@ -122,7 +122,8 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise
     }).to_csv(output_prefix + NOISE_ACGT, sep='\t', index=False)
 
     # For noise from Deletions
-    thresh_boolv_del = pileup_df_all.apply(lambda row: (row['deletions'] / (row['total_acgt'] + row['deletions'])) < noise_threshold, axis=1)
+    thresh_lambda = lambda row: (row['deletions'] / (row['total_acgt'] + row['deletions'] + EPSILON)) < noise_threshold
+    thresh_boolv_del = pileup_df_all.apply(thresh_lambda, axis=1)
     below_thresh_positions_del = pileup_df_all[thresh_boolv_del]
     noisy_positions_del = below_thresh_positions_del[below_thresh_positions_del['deletions'] > 0]
     contributing_sites_del = noisy_positions_del.shape[0]
