@@ -3,8 +3,10 @@
 import os
 import pytest
 from pytest import approx
+import pandas as pd
 
 from sequence_qc.noise import calculate_noise, OUTPUT_NOISE_FILENAME, OUTPUT_PILEUP_NAME
+from sequence_qc.plots import plot_top_noisy_positions
 
 
 def test_calculate_noise():
@@ -31,6 +33,16 @@ def test_calculate_noise():
     ]:
         assert os.path.exists(filename)
         os.unlink(filename)
+
+
+def test_noisy_positions_plot():
+    """
+    Test HTML plot from plotly is produced
+
+    :return:
+    """
+    noise_df = pd.read_csv('test_data/test_noise_positions.tsv', sep='\t')
+    plot_top_noisy_positions(noise_df)
 
 
 if __name__ == '__main__':

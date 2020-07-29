@@ -104,7 +104,7 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, output_prefix: str, noise
     below_thresh_positions = pileup_df_all[thresh_boolv]
     noisy_boolv = (below_thresh_positions[ALT_COUNT] > 0) | (below_thresh_positions['insertions'] > 0)
     noisy_positions = below_thresh_positions[noisy_boolv]
-    noisy_positions = noisy_positions.sort_values(ALT_COUNT)
+    noisy_positions = noisy_positions.sort_values(ALT_COUNT, ascending=False)
 
     noisy_positions.to_csv(output_prefix + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
     plot_top_noisy_positions(noisy_positions, output_prefix)
