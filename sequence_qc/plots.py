@@ -3,6 +3,7 @@ import plotly.express as px
 
 
 TOP_NOISE_PLOT = 'noisy_positions.html'
+N_COUNTS_PLOT = 'n_counts.html'
 
 
 def plot_top_noisy_positions(noisy_pileup_df: pd.DataFrame, sample_id: str = '') -> None:
@@ -23,3 +24,23 @@ def plot_top_noisy_positions(noisy_pileup_df: pd.DataFrame, sample_id: str = '')
         hover_data=['ref', 'A', 'C', 'G', 'T', 'minor_allele_count', 'major_allele_count']
     )
     fig.write_html(sample_id + TOP_NOISE_PLOT)
+
+
+def plot_n_counts(pileup_df: pd.DataFrame, sample_id: str = '') -> None:
+    """
+    Barplot of number of sites with each discrete N count
+
+    :param pileup_df:
+    :param sample_id:
+    :return:
+    """
+
+    n_counts = pileup_df['N'].value_counts()
+    title = 'Positions with each N count, for sample {}'.format(sample_id)
+    fig = px.bar(
+        x = n_counts.index,
+        y = n_counts,
+        title = title,
+        labels = {'x': 'N count', 'y': 'Number of positions'}
+    )
+    fig.write_html(sample_id + N_COUNTS_PLOT)
