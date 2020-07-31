@@ -1,6 +1,9 @@
 import pandas as pd
 import plotly.express as px
 
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
 
 TOP_NOISE_PLOT = 'noisy_positions.html'
 N_COUNTS_PLOT = 'n_counts.html'
@@ -15,14 +18,34 @@ def plot_top_noisy_positions(noisy_pileup_df: pd.DataFrame, sample_id: str = '')
     """
     noisy_pileup_df = noisy_pileup_df.sort_values('noise_acgt', ascending=False)
     noisy_pileup_df['chrom_pos'] = noisy_pileup_df['chrom'] + ':' + noisy_pileup_df['pos'].astype(str)
-    title = 'Top 100 Noisy Positions for sample {}'.format(sample_id)
-    fig = px.bar(
-        noisy_pileup_df[:100],
-        x='chrom_pos',
-        y='noise_acgt',
-        title=title,
-        hover_data=['ref', 'A', 'C', 'G', 'T', 'minor_allele_count', 'major_allele_count']
+    bar_title = 'Top 100 Noisy Positions for sample {}'.format(sample_id)
+    box_title = 'All positions'
+
+    fig = make_subplots(
+        rows=1,
+        cols=4,
+        specs=[[{"colspan": 3}, None, None, {}]],
+        subplot_titles=(bar_title, box_title)
     )
+
+    noise_subset = noisy_pileup_df[:100]
+
+    fig.add_trace(
+        go.Bar(
+            x=noise_subset['chrom_pos'],
+            y=noise_subset['noise_acgt'],
+            text=noise_subset['minor_allele_count']
+        ),
+        row=1, col=1
+    )
+
+    fig.add_trace(
+        go.Violin(
+            y=noisy_pileup_df['noise_acgt'],
+        ),
+        row=1, col=4
+    )
+
     fig.write_html(sample_id + TOP_NOISE_PLOT)
 
 
