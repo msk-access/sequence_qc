@@ -30,6 +30,7 @@ def plot_noisy_positions(noisy_pileup_df: pd.DataFrame, sample_id: str = '') -> 
     fig.update_layout(showlegend=False)
     fig.update_yaxes(title_text="minor allele count / total", range=[0, 0.2], row=1, col=1)
     fig.update_xaxes(title_text="contig:position", row=1, col=1)
+    fig.update_xaxes(title_text="", row=1, col=4, showticklabels=False)
 
     noise_subset = noisy_pileup_df[:100]
 
