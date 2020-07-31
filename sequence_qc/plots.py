@@ -61,7 +61,6 @@ def plot_n_counts(pileup_df: pd.DataFrame, sample_id: str = '') -> None:
     :param sample_id:
     :return:
     """
-
     n_counts = pileup_df['N'].value_counts()
     title = 'Positions with each N count, for sample {}'.format(sample_id)
     fig = px.bar(
@@ -70,4 +69,5 @@ def plot_n_counts(pileup_df: pd.DataFrame, sample_id: str = '') -> None:
         title = title,
         labels = {'x': 'N count', 'y': 'Number of positions'}
     )
+    fig.update_xaxes(range=[0, 50])
     fig.write_html(sample_id + N_COUNTS_PLOT)

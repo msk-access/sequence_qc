@@ -6,7 +6,7 @@ from pytest import approx
 import pandas as pd
 
 from sequence_qc.noise import calculate_noise, OUTPUT_NOISE_FILENAME, OUTPUT_PILEUP_NAME
-from sequence_qc.plots import plot_noisy_positions
+from sequence_qc import plots
 
 
 def test_calculate_noise():
@@ -42,7 +42,17 @@ def test_noisy_positions_plot():
     :return:
     """
     noise_df = pd.read_csv('test_data/test_noise_positions.tsv', sep='\t')
-    plot_noisy_positions(noise_df)
+    plots.plot_noisy_positions(noise_df)
+
+
+def test_n_counts_plot():
+    """
+    Test HTML plot for N counts
+
+    :return:
+    """
+    noise_df = pd.read_csv('test_data/test_noise_positions.tsv', sep='\t')
+    plots.plot_n_counts(noise_df)
 
 
 if __name__ == '__main__':
