@@ -9,9 +9,9 @@ TOP_NOISE_PLOT = 'noisy_positions.html'
 N_COUNTS_PLOT = 'n_counts.html'
 
 
-def plot_top_noisy_positions(noisy_pileup_df: pd.DataFrame, sample_id: str = '') -> None:
+def plot_noisy_positions(noisy_pileup_df: pd.DataFrame, sample_id: str = '') -> None:
     """
-    Barplot of positions with most noise, as defined by calculate_noise module
+    Barplot and violin plot of positions with most noise, as defined by calculate_noise module
 
     :param pileup_df:
     :return:
@@ -25,8 +25,11 @@ def plot_top_noisy_positions(noisy_pileup_df: pd.DataFrame, sample_id: str = '')
         rows=1,
         cols=4,
         specs=[[{"colspan": 3}, None, None, {}]],
-        subplot_titles=(bar_title, box_title)
+        subplot_titles=(bar_title, box_title),
     )
+    fig.update_layout(showlegend=False)
+    fig.update_yaxes(title_text="minor allele count / total", range=[0, 0.2], row=1, col=1)
+    fig.update_xaxes(title_text="contig:position", row=1, col=1)
 
     noise_subset = noisy_pileup_df[:100]
 
