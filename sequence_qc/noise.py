@@ -107,7 +107,6 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     noisy_positions = noisy_positions.sort_values(ALT_COUNT, ascending=False)
 
     noisy_positions.to_csv(sample_id + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
-    plots.plot_noisy_positions(noisy_positions, sample_id)
     contributing_sites = noisy_positions.shape[0]
     alt_count_total = below_thresh_positions[ALT_COUNT].sum()
     geno_count_total = below_thresh_positions[GENO_COUNT].sum()
@@ -145,8 +144,9 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     total_n = noisy_positions_n['N'].sum()
     total_acgt = pileup_df_all['total_acgt'].sum()
     noise_n = total_n / (total_n + total_acgt + EPSILON)
-    # N's barchart
-    plots.plot_n_counts(pileup_df_all, sample_id)
+
+    # Make plots
+    plots.all_plots(pileup_df_all, noisy_positions, sample_id)
 
     pd.DataFrame({
         SAMPLE_ID: [sample_id],

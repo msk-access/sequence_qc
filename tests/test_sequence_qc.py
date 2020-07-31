@@ -55,5 +55,16 @@ def test_n_counts_plot():
     plots.plot_n_counts(noise_df)
 
 
+def test_all_plots():
+    """
+    Test combined HTML plot
+
+    :return:
+    """
+    noise_df = pd.read_csv('test_data/test_noise_positions.tsv', sep='\t')
+    plots.all_plots(noise_df, noise_df)
+    assert os.path.exists('noise.html')
+
+
 if __name__ == '__main__':
     pytest.main()
