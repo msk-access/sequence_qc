@@ -5,3 +5,4 @@ pytest==5.4.2
 click==7.1.2
 pysamstats==1.1.2
 pandas==1.0.3
+plotly==4.9.0
