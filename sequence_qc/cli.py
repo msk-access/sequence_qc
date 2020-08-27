@@ -15,10 +15,6 @@ from sequence_qc import noise
 def calculate_noise(ref_fasta, bam_file, bed_file, sample_id, threshold, truncate, min_mapq, min_basq):
     """
     Calculate noise level of given bam file, across the given positions in `bed_file`.
-
-    :param count:
-    :param name:
-    :return:
     """
     sample_level_noise = noise.calculate_noise(
         ref_fasta=ref_fasta,
