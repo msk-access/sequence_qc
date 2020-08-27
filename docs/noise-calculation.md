@@ -6,7 +6,44 @@ description: Generate a pileup and noise QC metrics from a Bam file
 
 ## Description
 
-Noise is calculated by looking at positions from the `bed_file` , and setting the genotype for each position to the base with the highest count. Then, for positions where there is no alternate allele that exceeds `threshold`, we divide the total number of non-genotype bases by the total number of bases. 
+Noise is calculated by looking at positions from the `bed_file` , and setting the genotype for each position to the base with the highest count. Then, for positions where there is no alternate allele that exceeds `threshold`, we divide the total number of non-genotype bases by the total number of bases.
+
+## Usage
+
+```text
+Usage: calculate_noise [OPTIONS]
+
+  Calculate noise level of given bam file, across the given positions in
+  `bed_file`.
+
+Options:
+  --ref_fasta TEXT           Path to reference fasta, containing all regions
+                             in bed_file  [required]
+
+  --bam_file TEXT            Path to BAM file for calculating noise
+                             [required]
+
+  --bed_file TEXT            Path to BED file containing regions over which to
+                             calculate noise  [required]
+
+  --threshold FLOAT          Alt allele frequency past which to ignore
+                             positions from the calculation
+
+  --include_insertions TEXT  Include bases from insertions in noise
+                             calculation
+
+  --include_deletions TEXT   Include bases from deletions in noise calculation
+  --include_n TEXT           Include bases masked as 'N' in noise calculation
+  --truncate INTEGER         Whether to exclude trailing bases from reads that
+                             only partially overlap the bed file (0 or 1)
+
+  --flag_filter INTEGER      Reads with any of these flags set will be
+                             excluded from the calculation
+
+  --min_mapq INTEGER         Exclude reads with a lower mapping quality
+  --min_basq INTEGER         Exclude bases with a lower base quality
+  --help                     Show this message and exit.
+```
 
 ## Parameters
 
@@ -16,8 +53,8 @@ Noise is calculated by looking at positions from the `bed_file` , and setting th
 | **bam\_file** \(string\) | Path to Bam file for which to do calculation |  |
 | **output\_prefix** \(string\) | Prefix used for output files \(normally a sample ID\) |  |
 | **bed\_file** \(string\) | Path to bed file which contains regions for which to calculate noise |  |
-| **threshold** \(float\) | This value will be used as a definition of "noisy" positions. For the default of `0.02`this means that only positions with alt alleles at less than 2% allele frequency will contribute to the major\_allele\_count and minor\_allele\_count.  | 0.02 |
-| **truncate** \(bool\) | If set to 1, bases from reads that only partially overlap the regions in `bed_file` will be included in the calculation.  | True |
+| **threshold** \(float\) | This value will be used as a definition of "noisy" positions. For the default of `0.02`this means that only positions with alt alleles at less than 2% allele frequency will contribute to the major\_allele\_count and minor\_allele\_count. | 0.02 |
+| **truncate** \(bool\) | If set to 1, bases from reads that only partially overlap the regions in `bed_file` will be included in the calculation. | True |
 | **min\_mapq** \(int\) | Exclude reads with a lower mapping quality | 1 |
 | **min\_basq** \(int\) | Exclude reads with a lower base quality | 1 |
 
