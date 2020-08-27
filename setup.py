@@ -73,6 +73,10 @@ setup(
     test_suite='tests',
     #tests_require=req_file("requirements_dev.txt"),
     url='https://github.com/msk-access/sequence_qc',
+<<<<<<< HEAD
     version='0.1.16',
+=======
+    version='0.1.17',
+>>>>>>> 101f08ba05e2682189150940a000ee7f867a4e86
     zip_safe=False,
 )
