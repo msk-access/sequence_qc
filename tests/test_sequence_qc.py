@@ -63,7 +63,7 @@ def test_all_plots():
     """
     noise_df = pd.read_csv('test_data/test_noise_positions.tsv', sep='\t')
     plots.all_plots(noise_df, noise_df)
-    assert os.path.exists('noise.html')
+    assert os.path.exists('_noise.html')
 
 
 if __name__ == '__main__':
