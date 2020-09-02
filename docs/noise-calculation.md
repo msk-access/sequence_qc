@@ -25,20 +25,14 @@ Options:
 
   --bed_file TEXT            Path to BED file containing regions over which to
                              calculate noise  [required]
+                             
+  --sample_id TEXT           Prefix to include in all output file names 
 
   --threshold FLOAT          Alt allele frequency past which to ignore
                              positions from the calculation
 
-  --include_insertions TEXT  Include bases from insertions in noise
-                             calculation
-
-  --include_deletions TEXT   Include bases from deletions in noise calculation
-  --include_n TEXT           Include bases masked as 'N' in noise calculation
   --truncate INTEGER         Whether to exclude trailing bases from reads that
                              only partially overlap the bed file (0 or 1)
-
-  --flag_filter INTEGER      Reads with any of these flags set will be
-                             excluded from the calculation
 
   --min_mapq INTEGER         Exclude reads with a lower mapping quality
   --min_basq INTEGER         Exclude bases with a lower base quality
