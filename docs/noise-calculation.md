@@ -69,3 +69,23 @@ Options:
 * `noise_n.tsv` This file is identical to `noise_acgt`, however in this case N is used as the minor\_allele and other base changes are ignored
 * `noise_del.tsv` This file is identical to `noise_acgt`, however in this case deletions are used as the minor\_allele and other base changes are ignored
 
+## Calculation Details
+
+A single value for the noise level of the sample over the regions listed in the `bed_file` is calculated in the following manner:
+
+$$
+\begin{aligned}
+&total\_depth_{i} = \sum_{n\ in\ {A, C, G, T}}count(n)\ at\ position\ i\\
+\\
+&genotype_{i} = max\{count(A), count(C), count(G), count(T)\}\ at\ position\ i\\
+\\
+&alt\_count_i = \sum_{n\ in\ {A,C,G,T}}{^{0\ if\ n\ =\ genotype_i}_{count(n)\ o.w.}}\\
+\\
+&noise = 100 \cdot \frac{\sum_j{alt\_count_j}}{\sum_j{total\_depth_j}}\\
+\\
+&where\ j = positions\ for\ which\ \frac{alt\_count^n_j}{total\_depth_j} < threshold\ for\ n\ in\ {\{A,C,G,T\}}\\
+\end{aligned}\\
+$$
+
+Essentially, this means for every position which does not have any alt allele which exceeds the threshold, the noise level is the total count of alt bases as such positions, divided by the total number of bases at such positions. 
+
