@@ -68,6 +68,9 @@ Options:
 
 * `noise_n.tsv` This file is identical to `noise_acgt`, however in this case N is used as the minor\_allele and other base changes are ignored
 * `noise_del.tsv` This file is identical to `noise_acgt`, however in this case deletions are used as the minor\_allele and other base changes are ignored
+* `noise.html` - HTML report with summary of
+  * Top noisy positions with highest alt allele frequencies
+  * Histogram of positions from `bed_file` with each count of masked "N" bases
 
 ## Calculation Details
 
