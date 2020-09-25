@@ -5,12 +5,14 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+# from sequence_qc.noise import NOISE_FRACTION
+
 
 TOP_NOISE_PLOT = 'noisy_positions.html'
 N_COUNTS_PLOT = 'n_counts.html'
 
 
-def all_plots(pileup_df: pd.DataFrame, noisy_positions: pd.DataFrame, sample_id: str = '') -> None:
+def all_plots(pileup_df: pd.DataFrame, noisy_positions: pd.DataFrame, st_df: pd.DataFrame, sample_id: str = '') -> None:
     """
     Create all plots in a single HTML report
 
@@ -20,10 +22,30 @@ def all_plots(pileup_df: pd.DataFrame, noisy_positions: pd.DataFrame, sample_id:
     """
     with open(sample_id + '_noise.html', 'w') as f:
         f.write('<h1 style=\'font-family: sans-serif\'>Noise Report for sample {}</h1>'.format(sample_id))
+
+        fig = plot_noise_by_substitution(st_df)
+        f.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
         fig = plot_noisy_positions(noisy_positions)
         f.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
         fig = plot_n_counts(pileup_df)
         f.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
+
+
+def plot_noise_by_substitution(st_df: pd.DataFrame) -> plotly.graph_objects.Figure:
+    """
+    Barplot for noise fraction of each sustitution type
+
+    :param st_df: pd.DataFrame - With rows for each substitution type, and column 'NOISE_FRACTION'
+    :return:
+    """
+    title = 'Noise By Substitution'
+    fig = px.bar(
+        x = st_df.index,
+        y = st_df['noise_fraction'],
+        title = title,
+        labels = {'x': 'Substitution', 'y': 'Alt Count / (Alt Count + Count of Pre-substitution Base)'}
+    )
+    return fig
 
 
 def plot_noisy_positions(noisy_pileup_df: pd.DataFrame) -> plotly.graph_objects.Figure:

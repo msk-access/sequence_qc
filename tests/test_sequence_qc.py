@@ -62,7 +62,8 @@ def test_all_plots():
     :return:
     """
     noise_df = pd.read_csv('test_data/test_noise_positions.tsv', sep='\t')
-    plots.all_plots(noise_df, noise_df)
+    noise_by_substitution = pd.read_csv('test_data/test_noise_by_substitution.tsv', sep='\t')
+    plots.all_plots(noise_df, noise_df, noise_by_substitution)
     assert os.path.exists('_noise.html')
 
 

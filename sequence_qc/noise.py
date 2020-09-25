@@ -21,6 +21,7 @@ NOISE_ACGT = 'noise_acgt.tsv'
 NOISE_DEL = 'noise_del.tsv'
 NOISE_ACGT_INDEL = 'noise_acgt_indel.tsv'
 NOISE_N = 'noise_n.tsv'
+NOISE_BY_SUBSTITUTION = 'noise_by_substitution.tsv'
 # Headers for output files
 ALT_COUNT = 'minor_allele_count'
 GENO_COUNT = 'major_allele_count'
@@ -151,8 +152,12 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     total_acgt = pileup_df_all['total_acgt'].sum()
     noise_n = total_n / (total_n + total_acgt + EPSILON)
 
+    # By Substitution Type
+    st_df = _calculate_noise_by_substitution(below_thresh_positions, sample_id)
+    st_df.to_csv(sample_id + NOISE_BY_SUBSTITUTION, sep='\t')
+
     # Make plots
-    plots.all_plots(pileup_df_all, noisy_positions, sample_id)
+    plots.all_plots(pileup_df_all, noisy_positions, st_df, sample_id)
 
     pd.DataFrame({
         SAMPLE_ID: [sample_id],
@@ -198,3 +203,65 @@ def _calculate_alt_and_geno(noise_df: pd.DataFrame) -> pd.DataFrame:
     noise_df[ALT_COUNT] = noise_df['total_acgt'] - noise_df[GENO_COUNT]
     noise_df['noise_acgt'] = noise_df[ALT_COUNT] / noise_df['total_acgt']
     return noise_df
+
+def _calculate_noise_by_substitution(below_thresh_positions: pd.DataFrame, sample_id: str) -> pd.DataFrame:
+    """
+    Use the below_threhold_positions data frame to calculate noise of each substitution type
+
+    :param below_thresh_positions: pd.DataFrame
+    :param sample_id: str - sample ID for first column
+    :return: pd.DataFrame
+    """
+
+    # All possible substitution types
+    substitution_types = [
+        'A>C',
+        'A>G',
+        'A>T',
+        'C>A',
+        'C>G',
+        'C>T',
+        'G>A',
+        'G>C',
+        'G>T',
+        'T>A',
+        'T>C',
+        'T>G',
+    ]
+
+    # Alt counts for each substitution type
+    st_alt_counts = {}
+    for st in substitution_types:
+        st_alt_counts[st] = 0
+
+    # Genotype counts for each substitution type
+    st_geno_counts = {}
+    for st in substitution_types:
+        st_geno_counts[st] = 0
+
+    # Contributing sites counts for each substitution type
+    st_contributing_sites = {}
+    for st in substitution_types:
+        st_contributing_sites[st] = 0
+
+    for _, row in below_thresh_positions.iterrows():
+        alts =  ['A', 'C', 'G', 'T']
+        base_counts = {'A': row['A'], 'C': row['C'], 'G': row['G'], 'T': row['T']}
+        genotype = max(base_counts, key=base_counts.get)
+        alts.remove(genotype)
+        geno_count = row[['A', 'C', 'G', 'T']].max()
+
+        for alt in alts:
+            st = genotype + '>' + alt
+            st_geno_counts[st] += geno_count
+            st_alt_counts[st] += row[alt]
+
+            if row[alt] > 0:
+                st_contributing_sites[st] += 1
+
+    st_df = pd.DataFrame.from_dict(st_alt_counts, orient='index', columns=[ALT_COUNT])
+    st_df[GENO_COUNT] = st_df.index.map(st_geno_counts)
+    st_df[CONTRIBUTING_SITES] = st_df.index.map(st_contributing_sites)
+    st_df[NOISE_FRACTION] = st_df[ALT_COUNT] / (st_df[ALT_COUNT] + st_df[GENO_COUNT])
+    st_df['sample_id'] = sample_id
+    return st_df
