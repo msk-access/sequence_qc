@@ -1,6 +1,7 @@
 SeraCare_0-5.sam
 - only 10 reads from SeraCare 0.5% bam
 - introduced test changes in reads:
+    - C>A mutation in one read at first position
     - N at first position
     - 5bp insertion at 2nd position
     - 1bp deletion at 8th position
