@@ -92,8 +92,14 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     """
     Use the pileup to determine average noise, and create noise output files
 
-    :param pileup:
-    :return:
+    This method creates two new DataFrames for noise calculations:
+        1. below_thresh_positions - Pileup filtered for positions with noise level < noise_threshold
+        2. noisy_positions - Pileup additionally filtered for positions with ALT_COUNT or insertions > 0
+
+    :param pileup: pd.DataFrame - pileup of all positions and base counts from pysamstats
+    :param sample_id: str - sample ID for naming outputs
+    :param noise_threshold: float - Threshold past which to exclude positions from noise calculation
+    :return: floate - Single noise value for this sample
     """
     pileup_df_all = _calculate_alt_and_geno(pileup)
 
