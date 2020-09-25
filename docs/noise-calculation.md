@@ -25,20 +25,14 @@ Options:
 
   --bed_file TEXT            Path to BED file containing regions over which to
                              calculate noise  [required]
+                             
+  --sample_id TEXT           Prefix to include in all output file names 
 
   --threshold FLOAT          Alt allele frequency past which to ignore
                              positions from the calculation
 
-  --include_insertions TEXT  Include bases from insertions in noise
-                             calculation
-
-  --include_deletions TEXT   Include bases from deletions in noise calculation
-  --include_n TEXT           Include bases masked as 'N' in noise calculation
   --truncate INTEGER         Whether to exclude trailing bases from reads that
                              only partially overlap the bed file (0 or 1)
-
-  --flag_filter INTEGER      Reads with any of these flags set will be
-                             excluded from the calculation
 
   --min_mapq INTEGER         Exclude reads with a lower mapping quality
   --min_basq INTEGER         Exclude bases with a lower base quality
@@ -74,4 +68,27 @@ Options:
 
 * `noise_n.tsv` This file is identical to `noise_acgt`, however in this case N is used as the minor\_allele and other base changes are ignored
 * `noise_del.tsv` This file is identical to `noise_acgt`, however in this case deletions are used as the minor\_allele and other base changes are ignored
+* `noise.html` - HTML report with summary of
+  * Top noisy positions with highest alt allele frequencies
+  * Histogram of positions from `bed_file` with each count of masked "N" bases
+
+## Calculation Details
+
+A single value for the noise level of the sample over the regions listed in the `bed_file` is calculated in the following manner:
+
+$$
+\begin{aligned}
+&total\_depth_{i} = \sum_{n\ in\ {A, C, G, T}}count(n)\ at\ position\ i\\
+\\
+&genotype_{i} = max\{count(A), count(C), count(G), count(T)\}\ at\ position\ i\\
+\\
+&alt\_count_i = \sum_{n\ in\ {A,C,G,T}}{^{0\ if\ n\ =\ genotype_i}_{count(n)\ o.w.}}\\
+\\
+&noise = 100 \cdot \frac{\sum_j{alt\_count_j}}{\sum_j{total\_depth_j}}\\
+\\
+&where\ j = positions\ for\ which\ \frac{alt\_count^n_j}{total\_depth_j} < threshold\ for\ n\ in\ {\{A,C,G,T\}}\\
+\end{aligned}\\
+$$
+
+Essentially, this means for every position which does not have any alt allele which exceeds the threshold, the noise level is the total count of alt bases as such positions, divided by the total number of bases at such positions. 
 
