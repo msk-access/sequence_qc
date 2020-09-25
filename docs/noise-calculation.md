@@ -74,7 +74,7 @@ Options:
 
 ## Calculation Details
 
-A single value for the noise level of the sample over the regions listed in the `bed_file` is calculated in the following manner:
+For the overall noise level of the sample, a single valued is calculated over the regions listed in the `bed_file` in the following manner:
 
 $$
 \begin{aligned}
@@ -90,5 +90,35 @@ $$
 \end{aligned}\\
 $$
 
-Essentially, this means for every position which does not have any alt allele which exceeds the threshold, the noise level is the total count of alt bases as such positions, divided by the total number of bases at such positions. 
+Essentially, this means for every position which does not have any alt allele which exceeds the threshold, the noise level is the total count of alt bases as such positions, divided by the total number of bases at such positions. For the noise-by-substitution calculation, only the specified alternate allele contributes to the numerator and denominator of the noise fraction. 
+
+## Plots Output
+
+The module will output an HTML report with noise metrics, here is an example report file:
+
+{% file src=".gitbook/assets/donor6-t\_noise.html" caption="sequence\_qc Noise.html Report \(v0.1.19\)" %}
+
+Here is a brief description each plot in the report:
+
+![](.gitbook/assets/screen-shot-2020-09-25-at-2.59.33-pm.png)
+
+#### Noise By Substitution:
+
+* Uses the previously-defined calculation to express the noise level of this sample, for each of the 12 possible substitution types
+* Expected noise level is on the order of 10e-6 for ACCESS duplex and simplex samples
+* C&gt;T and G&gt;A noise levels are usually the highest
+
+![](.gitbook/assets/screen-shot-2020-09-25-at-2.59.43-pm.png)
+
+#### Top noisy positions:
+
+* The positions from the `bed_file` are sorted by those with the highest noise fraction, and the top positions' noise fractions are plotted 
+* Violin plot represents all positions from the bed file, and is expected to have most positions on the low end, with some outliers closer to the supplied threshold
+
+![](.gitbook/assets/screen-shot-2020-09-25-at-2.59.54-pm%20%281%29.png)
+
+#### N Counts Histogram
+
+* Each position is counted for "N" or no-calls, and the number of positions with each N count is plotted as a histogram
+* ACCESS samples are expected to have a peak below 10 N's, although duplex and simplex samples will have a larger number of N bases than the original uncollapsed or "standard" bam files
 
