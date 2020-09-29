@@ -8,15 +8,14 @@ from plotly.subplots import make_subplots
 # from sequence_qc.noise import NOISE_FRACTION
 
 
-TOP_NOISE_PLOT = 'noisy_positions.html'
-N_COUNTS_PLOT = 'n_counts.html'
-
 
 def all_plots(pileup_df: pd.DataFrame, noisy_positions: pd.DataFrame, st_df: pd.DataFrame, sample_id: str = '') -> None:
     """
     Create all plots in a single HTML report
 
-    :param pileup_df:
+    :param pileup_df: pd.DataFrame - All positions from bed file as data frame
+    :param noisy_positions: pd.DataFrame - Noisy positions data frame
+    :param st_df: pd.DataFrame - Substitution types data frame
     :param sample_id:
     :return:
     """
@@ -33,9 +32,9 @@ def all_plots(pileup_df: pd.DataFrame, noisy_positions: pd.DataFrame, st_df: pd.
 
 def plot_noise_by_substitution(st_df: pd.DataFrame) -> plotly.graph_objects.Figure:
     """
-    Barplot for noise fraction of each sustitution type
+    Barplot for noise fraction of each substitution type
 
-    :param st_df: pd.DataFrame - With rows for each substitution type, and column 'NOISE_FRACTION'
+    :param st_df: pd.DataFrame - Data frame with rows for each substitution type, and column 'NOISE_FRACTION'
     :return:
     """
     title = 'Noise By Substitution'
@@ -52,7 +51,7 @@ def plot_noisy_positions(noisy_pileup_df: pd.DataFrame) -> plotly.graph_objects.
     """
     Barplot and violin plot of positions with most noise, as defined by calculate_noise module
 
-    :param pileup_df:
+    :param noisy_pileup_df:
     :return:
     """
     noisy_pileup_df = noisy_pileup_df.sort_values('noise_acgt', ascending=False)
@@ -96,7 +95,6 @@ def plot_n_counts(pileup_df: pd.DataFrame) -> px.bar:
     Barplot of number of sites with each discrete N count
 
     :param pileup_df:
-    :param sample_id:
     :return:
     """
     n_counts = pileup_df['N'].value_counts()

@@ -26,15 +26,4 @@ def calculate_noise(ref_fasta, bam_file, bed_file, sample_id, threshold, truncat
         min_mapping_quality=min_mapq,
         min_base_quality=min_basq,
     )
-
-    # todo: add parameter -o for output file and print to there
     print(sample_level_noise)
-
-
-def calculate_contributing_sites():
-    """
-
-
-    :return:
-    """
-

@@ -170,7 +170,7 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     return noise
 
 
-def _apply_threshold(row: pd.Series, thresh: float, with_del: bool = False) -> bool:
+def _apply_threshold(row: pd.Series, thresh: float) -> bool:
     """
     Returns False if any alt allele crosses `thresh` for the given row of the pileup, True otherwise
 
