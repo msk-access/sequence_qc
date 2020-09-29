@@ -40,9 +40,16 @@ def plot_noise_by_substitution(st_df: pd.DataFrame) -> plotly.graph_objects.Figu
     title = 'Noise By Substitution'
     fig = px.bar(
         x = st_df.index,
-        y = st_df['noise_fraction'],
+        # Making units easier to display by raising to 10^6
+        y = st_df['noise_fraction'] * (10**6),
         title = title,
-        labels = {'x': 'Substitution', 'y': 'Alt Count / (Alt Count + Count of Pre-substitution Base)'}
+        labels = {'x': 'Substitution', 'y': 'Alt Count / (Alt Count + Ref Count) x 10^6'}
+    )
+    fig.update_layout(
+        yaxis=dict(
+            showexponent='none',
+            exponentformat='none'
+        )
     )
     return fig
 
@@ -66,9 +73,8 @@ def plot_noisy_positions(noisy_pileup_df: pd.DataFrame) -> plotly.graph_objects.
         subplot_titles=(bar_title, box_title),
     )
     fig.update_layout(showlegend=False)
-    fig.update_yaxes(title_text="minor allele count / total", range=[0, 0.2], row=1, col=1)
-    fig.update_xaxes(title_text="contig:position", row=1, col=1)
-    fig.update_xaxes(title_text="", row=1, col=4, showticklabels=False)
+    fig.update_yaxes(title_text="Alt Count / Total Count", range=[0, 0.2], row=1, col=1)
+    fig.update_xaxes(title_text="Genomic Position", row=1, col=1, showticklabels=False)
 
     noise_subset = noisy_pileup_df[:100]
 
@@ -87,6 +93,7 @@ def plot_noisy_positions(noisy_pileup_df: pd.DataFrame) -> plotly.graph_objects.
         ),
         row=1, col=4
     )
+    fig.update_xaxes(title_text="", row=1, col=4, showticklabels=False)
     return fig
 
 
