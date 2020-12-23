@@ -73,7 +73,7 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
 
         pileup = pysamstats.load_pileup('variation', bam, chrom=chrom, start=start, end=stop, fafile=ref_fasta,
                                         truncate=truncate, max_depth=30000, min_baseq=min_base_quality,
-                                        min_mapq=min_mapping_quality)
+                                        min_mapq=min_mapping_quality, stepper='nofilter')
 
         pileup_df_all = pd.concat([pileup_df_all, pd.DataFrame(pileup)])
 
