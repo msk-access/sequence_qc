@@ -56,6 +56,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     description="Package for doing various ad-hoc quality control steps from MSK-ACCESS generated FASTQ or BAM files",
     entry_points={
