@@ -23,7 +23,7 @@ jobs:
         # for Docker Hub, as well as the name of the image itself
         id: prep
         run: |
-          DOCKER_IMAGE=ghcr.io/msk-access/biometrics
+          DOCKER_IMAGE=ghcr.io/msk-access/sequence_qc
           VERSION=noop
           if [ "${{ github.event_name }}" = "schedule" ]; then
             VERSION=nightly
@@ -62,7 +62,7 @@ jobs:
           push: true
           tags: ${{ steps.prep.outputs.tags }}
           build-args: |
-            BIOMETRICS_VERSION=${{ steps.prep.outputs.version }}
+            SEQUENCE_QC_VERSION=${{ steps.prep.outputs.version }}
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
             org.opencontainers.image.description=${{ github.event.repository.description }}
