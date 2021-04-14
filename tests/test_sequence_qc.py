@@ -8,6 +8,8 @@ import pandas as pd
 from sequence_qc.noise import calculate_noise, OUTPUT_NOISE_FILENAME, OUTPUT_PILEUP_NAME
 from sequence_qc import plots
 
+CUR_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 def test_calculate_noise():
     """
@@ -16,9 +18,9 @@ def test_calculate_noise():
     :return:
     """
     noise = calculate_noise(
-        'test_data/ref_nochr.fa',
-        'test_data/SeraCare_0-5.bam',
-        'test_data/test.bed',
+        os.path.join(CUR_DIR, 'test_data/ref_nochr.fa'),
+        os.path.join(CUR_DIR, 'test_data/SeraCare_0-5.bam'),
+        os.path.join(CUR_DIR, 'test_data/test.bed'),
         0.2,
         sample_id='test_'
     )
@@ -41,7 +43,7 @@ def test_noisy_positions_plot():
 
     :return:
     """
-    noise_df = pd.read_csv('test_data/test_noise_positions.tsv', sep='\t')
+    noise_df = pd.read_csv(os.path.join(CUR_DIR, 'test_data/test_noise_positions.tsv'), sep='\t')
     plots.plot_noisy_positions(noise_df)
 
 
@@ -51,7 +53,7 @@ def test_n_counts_plot():
 
     :return:
     """
-    noise_df = pd.read_csv('test_data/test_noise_positions.tsv', sep='\t')
+    noise_df = pd.read_csv(os.path.join(CUR_DIR, 'test_data/test_noise_positions.tsv'), sep='\t')
     plots.plot_n_counts(noise_df)
 
 
@@ -61,8 +63,9 @@ def test_all_plots():
 
     :return:
     """
-    noise_df = pd.read_csv('test_data/test_noise_positions.tsv', sep='\t')
-    noise_by_substitution = pd.read_csv('test_data/test_noise_by_substitution.tsv', sep='\t')
+    noise_df = pd.read_csv(os.path.join(CUR_DIR, 'test_data/test_noise_positions.tsv'), sep='\t')
+    noise_by_substitution = pd.read_csv(
+        os.path.join(CUR_DIR, 'test_data/test_noise_by_substitution.tsv'), sep='\t')
     plots.all_plots(noise_df, noise_df, noise_by_substitution)
     assert os.path.exists('_noise.html')
 
