@@ -38,7 +38,7 @@ def get_package_files(file_type):
     return paths
 
 
-with open(os.path.join(os.path.dirname(__file__), "biometrics/VERSION"), "r") as fh:
+with open(os.path.join(os.path.dirname(__file__), "sequence_qc/VERSION"), "r") as fh:
     __version__ = fh.read().strip()
 
 
