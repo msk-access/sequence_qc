@@ -47,7 +47,8 @@ output_columns = [
 
 
 def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_threshold: float, truncate: bool = True,
-                    min_mapping_quality: int = 1, min_base_quality: int = 1, sample_id: str = '',) -> float:
+                    min_mapping_quality: int = 1, min_base_quality: int = 1, sample_id: str = '',
+                    max_depth=30000) -> float:
     """
     Create file of noise across specified regions in `bed_file` using pybedtools and pysamstats
 
@@ -59,6 +60,7 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     :param truncate: int - 0 or 1, whether to exclude reads that only partially overlap the bedfile
     :param min_mapping_quality: int - exclude reads with mapping qualities less than this threshold
     :param min_base_quality: int - exclude bases with less than this base quality
+    :param max_depth: int - Maximum read depth for calculation
     :return:
     """
     bed_file = BedTool(bed_file_path)
@@ -72,7 +74,7 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
         stop = region.stop
 
         pileup = pysamstats.load_pileup('variation', bam, chrom=chrom, start=start, end=stop, fafile=ref_fasta,
-                                        truncate=truncate, max_depth=30000, min_baseq=min_base_quality,
+                                        truncate=truncate, max_depth=max_depth, min_baseq=min_base_quality,
                                         min_mapq=min_mapping_quality, stepper='nofilter')
 
         pileup_df_all = pd.concat([pileup_df_all, pd.DataFrame(pileup)])
