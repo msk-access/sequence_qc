@@ -204,6 +204,7 @@ def _calculate_alt_and_geno(noise_df: pd.DataFrame) -> pd.DataFrame:
     noise_df['noise_acgt'] = noise_df[ALT_COUNT] / noise_df['total_acgt']
     return noise_df
 
+
 def _calculate_noise_by_substitution(below_thresh_positions: pd.DataFrame, sample_id: str) -> pd.DataFrame:
     """
     Use the below_threhold_positions data frame to calculate noise of each substitution type
@@ -245,7 +246,7 @@ def _calculate_noise_by_substitution(below_thresh_positions: pd.DataFrame, sampl
         st_contributing_sites[st] = 0
 
     for _, row in below_thresh_positions.iterrows():
-        alts =  ['A', 'C', 'G', 'T']
+        alts = ['A', 'C', 'G', 'T']
         base_counts = {'A': row['A'], 'C': row['C'], 'G': row['G'], 'T': row['T']}
         genotype = max(base_counts, key=base_counts.get)
         alts.remove(genotype)

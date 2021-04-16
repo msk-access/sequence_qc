@@ -73,9 +73,7 @@ setup(
     package_data={
         "": ['requirements.txt', 'requirements_dev.txt'],
     },
-    #setup_requires=req_file("requirements_dev.txt"),
     test_suite='tests',
-    #tests_require=req_file("requirements_dev.txt"),
     url='https://github.com/msk-access/sequence_qc',
     version=__version__,
     zip_safe=False,

@@ -8,7 +8,6 @@ from plotly.subplots import make_subplots
 # from sequence_qc.noise import NOISE_FRACTION
 
 
-
 def all_plots(pileup_df: pd.DataFrame, noisy_positions: pd.DataFrame, st_df: pd.DataFrame, sample_id: str = '') -> None:
     """
     Create all plots in a single HTML report
@@ -39,11 +38,11 @@ def plot_noise_by_substitution(st_df: pd.DataFrame) -> plotly.graph_objects.Figu
     """
     title = 'Noise By Substitution'
     fig = px.bar(
-        x = st_df.index,
+        x=st_df.index,
         # Making units easier to display by raising to 10^6
-        y = st_df['noise_fraction'] * (10**6),
-        title = title,
-        labels = {'x': 'Substitution', 'y': 'Alt Count / (Alt Count + Ref Count) x 10^6'}
+        y=st_df['noise_fraction'] * (10**6),
+        title=title,
+        labels={'x': 'Substitution', 'y': 'Alt Count / (Alt Count + Ref Count) x 10^6'}
     )
     fig.update_layout(
         yaxis=dict(
@@ -107,10 +106,10 @@ def plot_n_counts(pileup_df: pd.DataFrame) -> px.bar:
     n_counts = pileup_df['N'].value_counts()
     title = 'Positions with each N count'
     fig = px.bar(
-        x = n_counts.index,
-        y = n_counts,
-        title = title,
-        labels = {'x': 'N count', 'y': 'Number of positions'}
+        x=n_counts.index,
+        y=n_counts,
+        title=title,
+        labels={'x': 'N count', 'y': 'Number of positions'}
     )
     fig.update_xaxes(range=[0, 50])
     return fig

@@ -9,7 +9,8 @@ from sequence_qc import noise
 @click.option("--bed_file", required=True, help="Path to BED file containing regions over which to calculate noise")
 @click.option("--sample_id", required=False, help="Prefix to include in all output file names")
 @click.option("--threshold", default=0.02, help="Alt allele frequency past which to ignore positions from the calculation")
-@click.option("--truncate", default=1, help="Whether to exclude trailing bases from reads that only partially overlap the bed file (0 or 1)")
+@click.option("--truncate", default=1, help="Whether to exclude trailing bases from reads that only partially overlap "
+                                            "the bed file (0 or 1)")
 @click.option("--min_mapq", default=1, help="Exclude reads with a lower mapping quality")
 @click.option("--min_basq", default=1, help="Exclude bases with a lower base quality")
 def calculate_noise(ref_fasta, bam_file, bed_file, sample_id, threshold, truncate, min_mapq, min_basq):
