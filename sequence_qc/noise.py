@@ -14,6 +14,7 @@ logger.setLevel(logging.DEBUG)
 
 EPSILON = 1e-9
 OUTPUT_PILEUP_NAME = 'pileup.tsv'
+OUTPUT_TLEN_NAME = 'tlen.tsv'
 OUTPUT_NOISE_FILENAME = 'noise_positions.tsv'
 
 # Output files
@@ -66,6 +67,7 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     bed_file = BedTool(bed_file_path)
     bam = AlignmentFile(bam_path)
     pileup_df_all = pd.DataFrame()
+    tlen_df_all = pd.DataFrame()
 
     # Build data frame of all positions in bed file
     for region in bed_file.intervals:
@@ -77,21 +79,29 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
                                         truncate=truncate, max_depth=max_depth, min_baseq=min_base_quality,
                                         min_mapq=min_mapping_quality, stepper='nofilter')
 
+        tlen = pysamstats.load_pileup('tlen_strand', bam, chrom=chrom, start=start, end=stop, fafile=ref_fasta,
+                                        truncate=truncate, max_depth=max_depth, min_baseq=min_base_quality,
+                                        min_mapq=min_mapping_quality, stepper='nofilter')
+
         pileup_df_all = pd.concat([pileup_df_all, pd.DataFrame(pileup)])
+        tlen_df_all = pd.concat([tlen_df_all, pd.DataFrame(tlen)])
 
     # Convert bytes objects to strings so output tsv is formatted correctly
     for field in ['chrom', 'ref']:
         pileup_df_all.loc[:, field] = pileup_df_all[field].apply(lambda s: s.decode('utf-8'))
+    tlen_df_all.loc[:, 'chrom'] = tlen_df_all['chrom'].apply(lambda s: s.decode('utf-8'))
 
-    # Save the complete pileup
+    # Save the complete pileup and tlen info
     pileup_df_all[output_columns].to_csv(sample_id + OUTPUT_PILEUP_NAME, sep='\t', index=False)
+    tlen_df_all.to_csv(sample_id + OUTPUT_TLEN_NAME, sep='\t', index=False)
 
     # Continue with calculation
-    noise = _calculate_noise_from_pileup(pileup_df_all, sample_id, noise_threshold)
+    noise = _calculate_noise_from_pileup(pileup_df_all, sample_id, noise_threshold, tlen_df_all)
     return noise
 
 
-def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_threshold: float) -> float:
+def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_threshold: float,
+                                 tlen_df_all: pd.DataFrame) -> float:
     """
     Use the pileup to determine average noise, and create noise output files
 
@@ -102,7 +112,8 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     :param pileup: pd.DataFrame - pileup of all positions and base counts from pysamstats
     :param sample_id: str - sample ID for naming outputs
     :param noise_threshold: float - Threshold past which to exclude positions from noise calculation
-    :return: floate - Single noise value for this sample
+    :param tlen_df_all: pd.DataFrame -
+    :return: float - Single noise value for this sample
     """
     pileup_df_all = _calculate_alt_and_geno(pileup)
 
@@ -114,6 +125,9 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     noisy_boolv = (below_thresh_positions[ALT_COUNT] > 0) | (below_thresh_positions['insertions'] > 0)
     noisy_positions = below_thresh_positions[noisy_boolv]
     noisy_positions = noisy_positions.sort_values(ALT_COUNT, ascending=False)
+
+    # Calculate average TLEN across noisy positions
+    avg_tlen_noise = pd.merge(noisy_positions, tlen_df_all, how='inner', on=['chrom', 'pos'])
 
     noisy_positions.to_csv(sample_id + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
     contributing_sites = noisy_positions.shape[0]
@@ -159,7 +173,7 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     st_df.to_csv(sample_id + NOISE_BY_SUBSTITUTION, sep='\t')
 
     # Make plots
-    plots.all_plots(pileup_df_all, noisy_positions, st_df, sample_id)
+    plots.all_plots(pileup_df_all, noisy_positions, st_df, avg_tlen_noise, sample_id)
 
     pd.DataFrame({
         SAMPLE_ID: [sample_id],

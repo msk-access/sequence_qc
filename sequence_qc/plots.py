@@ -8,13 +8,15 @@ from plotly.subplots import make_subplots
 # from sequence_qc.noise import NOISE_FRACTION
 
 
-def all_plots(pileup_df: pd.DataFrame, noisy_positions: pd.DataFrame, st_df: pd.DataFrame, sample_id: str = '') -> None:
+def all_plots(pileup_df: pd.DataFrame, noisy_positions: pd.DataFrame, st_df: pd.DataFrame, avg_tlen_noise: pd.DataFrame,
+              sample_id: str = '') -> None:
     """
     Create all plots in a single HTML report
 
     :param pileup_df: pd.DataFrame - All positions from bed file as data frame
     :param noisy_positions: pd.DataFrame - Noisy positions data frame
     :param st_df: pd.DataFrame - Substitution types data frame
+    :param avg_tlen_noise: pd.DataFrame -
     :param sample_id:
     :return:
     """
@@ -24,6 +26,8 @@ def all_plots(pileup_df: pd.DataFrame, noisy_positions: pd.DataFrame, st_df: pd.
         fig = plot_noise_by_substitution(st_df)
         f.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
         fig = plot_noisy_positions(noisy_positions)
+        f.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
+        fig = plot_noise_by_tlen(avg_tlen_noise)
         f.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
         fig = plot_n_counts(pileup_df)
         f.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
@@ -93,6 +97,22 @@ def plot_noisy_positions(noisy_pileup_df: pd.DataFrame) -> plotly.graph_objects.
         row=1, col=4
     )
     fig.update_xaxes(title_text="", row=1, col=4, showticklabels=False)
+    return fig
+
+
+def plot_noise_by_tlen(avg_tlen_noise: pd.DataFrame) -> px.bar:
+    """
+    Barplot of average template length at noisy sites
+    """
+    mean_tlen = avg_tlen_noise['mean_tlen'].value_counts()
+    title = 'Mean template length for positions with noise'
+    fig = px.bar(
+        x=mean_tlen.index,
+        y=mean_tlen,
+        title=title,
+        labels={'x': 'TLEN', 'y': 'Number of noisy positions'}
+    )
+    fig.update_xaxes(range=[0, 50])
     return fig
 
 

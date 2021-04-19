@@ -66,7 +66,8 @@ def test_all_plots():
     noise_df = pd.read_csv(os.path.join(CUR_DIR, 'test_data/test_noise_positions.tsv'), sep='\t')
     noise_by_substitution = pd.read_csv(
         os.path.join(CUR_DIR, 'test_data/test_noise_by_substitution.tsv'), sep='\t')
-    plots.all_plots(noise_df, noise_df, noise_by_substitution)
+    tlen_df = pd.read_csv(os.path.join(CUR_DIR, 'test_data/test_tlen.tsv'), sep='\t')
+    plots.all_plots(noise_df, noise_df, noise_by_substitution, tlen_df)
     assert os.path.exists('_noise.html')
 
 
