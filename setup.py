@@ -38,6 +38,10 @@ def get_package_files(file_type):
     return paths
 
 
+with open(os.path.join(os.path.dirname(__file__), "sequence_qc/VERSION"), "r") as fh:
+    __version__ = fh.read().strip()
+
+
 setup(
     author="Ian Johnson",
     author_email='ionox0@gmail.com',
@@ -69,10 +73,8 @@ setup(
     package_data={
         "": ['requirements.txt', 'requirements_dev.txt'],
     },
-    #setup_requires=req_file("requirements_dev.txt"),
     test_suite='tests',
-    #tests_require=req_file("requirements_dev.txt"),
     url='https://github.com/msk-access/sequence_qc',
-    version='0.1.18',
+    version=__version__,
     zip_safe=False,
 )

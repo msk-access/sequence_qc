@@ -5,3 +5,5 @@ tests/__pycache__
 build/
 dist/
 sequence_qc.egg-info/
+*.pyc
+.DS_Store
