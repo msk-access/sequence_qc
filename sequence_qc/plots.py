@@ -104,15 +104,17 @@ def plot_noise_by_tlen(avg_tlen_noise: pd.DataFrame) -> px.bar:
     """
     Barplot of average template length at noisy sites
     """
-    mean_tlen = avg_tlen_noise['mean_tlen'].value_counts()
-    title = 'Mean template length for positions with noise'
+    mean_tlen_fwd = avg_tlen_noise['mean_tlen_fwd'].value_counts()
+    mean_tlen_rev = avg_tlen_noise['mean_tlen_rev'].value_counts()
+    mean_tlen = pd.concat([mean_tlen_fwd, mean_tlen_rev])
+    title = 'Mean template length for positions with noise (calculated separately for fwd/rev reads)'
     fig = px.bar(
         x=mean_tlen.index,
         y=mean_tlen,
         title=title,
         labels={'x': 'TLEN', 'y': 'Number of noisy positions'}
     )
-    fig.update_xaxes(range=[0, 50])
+    fig.update_xaxes(range=[-200, 200])
     return fig
 
 
