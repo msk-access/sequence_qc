@@ -5,6 +5,7 @@ from pysam import AlignmentFile
 from pybedtools import BedTool
 
 from sequence_qc import plots
+from sequence_qc.noise_by_tlen import get_fragment_size_for_sample
 
 
 FORMAT = '%(asctime)-15s %(message)s'
@@ -96,12 +97,12 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     tlen_df_all.to_csv(sample_id + OUTPUT_TLEN_NAME, sep='\t', index=False)
 
     # Continue with calculation
-    noise = _calculate_noise_from_pileup(pileup_df_all, sample_id, noise_threshold, tlen_df_all)
+    noise = _calculate_noise_from_pileup(pileup_df_all, sample_id, noise_threshold, tlen_df_all, bam_path)
     return noise
 
 
 def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_threshold: float,
-                                 tlen_df_all: pd.DataFrame) -> float:
+                                 tlen_df_all: pd.DataFrame, bam_path: str) -> float:
     """
     Use the pileup to determine average noise, and create noise output files
 
@@ -125,9 +126,6 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     noisy_boolv = (below_thresh_positions[ALT_COUNT] > 0) | (below_thresh_positions['insertions'] > 0)
     noisy_positions = below_thresh_positions[noisy_boolv]
     noisy_positions = noisy_positions.sort_values(ALT_COUNT, ascending=False)
-
-    # Calculate average TLEN across noisy positions
-    avg_tlen_noise = pd.merge(noisy_positions, tlen_df_all, how='inner', on=['chrom', 'pos'])
 
     noisy_positions.to_csv(sample_id + OUTPUT_NOISE_FILENAME, sep='\t', index=False)
     contributing_sites = noisy_positions.shape[0]
@@ -172,8 +170,12 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     st_df = _calculate_noise_by_substitution(below_thresh_positions, sample_id)
     st_df.to_csv(sample_id + NOISE_BY_SUBSTITUTION, sep='\t')
 
+    # Noise vs genotype insert size calculation
+    noisy_positions_no_n = noisy_positions[noisy_positions['N'] == 0]
+    noisy_tlen_df = get_fragment_size_for_sample(sample_id, bam_path, sample_id, noisy_positions_no_n, True, 0, 500)
+
     # Make plots
-    plots.all_plots(pileup_df_all, noisy_positions, st_df, avg_tlen_noise, sample_id)
+    plots.all_plots(pileup_df_all, noisy_positions, st_df, noisy_tlen_df, sample_id)
 
     pd.DataFrame({
         SAMPLE_ID: [sample_id],

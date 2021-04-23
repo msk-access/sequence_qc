@@ -7,6 +7,7 @@ import pandas as pd
 
 from sequence_qc.noise import calculate_noise, OUTPUT_NOISE_FILENAME, OUTPUT_PILEUP_NAME
 from sequence_qc import plots
+from sequence_qc.noise_by_tlen import get_fragment_size_for_sample
 
 CUR_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -19,12 +20,12 @@ def test_calculate_noise():
     """
     noise = calculate_noise(
         os.path.join(CUR_DIR, 'test_data/ref_nochr.fa'),
-        os.path.join(CUR_DIR, 'test_data/SeraCare_0-5.bam'),
+        os.path.join(CUR_DIR, 'test_data/SeraCare_0-5_tmp.bam'),
         os.path.join(CUR_DIR, 'test_data/test.bed'),
         0.2,
         sample_id='test_'
     )
-    assert noise == approx(0.0012269938650291694, rel=1e-6)
+    assert noise == approx(0.0048899755501162715, rel=1e-6)
 
     for filename in [
             'test_' + OUTPUT_PILEUP_NAME,
@@ -35,6 +36,18 @@ def test_calculate_noise():
     ]:
         assert os.path.exists(filename)
         os.unlink(filename)
+
+
+def test_noise_by_tlen():
+    """
+    """
+    noisy_positions = pd.read_csv('test_data/SeraCare_noise_positions.tsv', sep='\t')
+    get_fragment_size_for_sample(
+        'test',
+        os.path.join(CUR_DIR, 'test_data/SeraCare_0-5_tmp.bam'),
+        'test',
+        noisy_positions, True, 0, 500
+    )
 
 
 def test_noisy_positions_plot():
@@ -66,8 +79,17 @@ def test_all_plots():
     noise_df = pd.read_csv(os.path.join(CUR_DIR, 'test_data/test_noise_positions.tsv'), sep='\t')
     noise_by_substitution = pd.read_csv(
         os.path.join(CUR_DIR, 'test_data/test_noise_by_substitution.tsv'), sep='\t')
-    tlen_df = pd.read_csv(os.path.join(CUR_DIR, 'test_data/test_tlen.tsv'), sep='\t')
-    plots.all_plots(noise_df, noise_df, noise_by_substitution, tlen_df)
+    filename = os.path.join(CUR_DIR, 'test_data/test_noise_by_tlen.tsv')
+
+    noisy_tlen_df = pd.read_csv(
+        filename,
+        sep="\t",
+        header=None,
+        names=["Sample", "Type", "read_id", "Var", "Size", "Chr", "Pos", "geno_not_geno"],
+        dtype="object",
+    )
+
+    plots.all_plots(noise_df, noise_df, noise_by_substitution, noisy_tlen_df)
     assert os.path.exists('_noise.html')
 
 
