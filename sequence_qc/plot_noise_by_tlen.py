@@ -4,6 +4,18 @@ import pandas as pd
 import plotly.figure_factory as ff
 
 
+SUBSTITUTION_TYPES_COMBINED = [
+    [["G>T", "C>A"], "C>A"],
+    [["C>G", "G>C"], "C>G"],
+    [["G>A", "C>T"], "C>T"],
+    [["T>A", "A>T"], "T>A"],
+    [["A>G", "T>C"], "T>C"],
+    [["T>G", "A>C"], "T>G"],
+]
+
+COLORS = ["#556278", "#C1292E", "#F2A535"]
+
+
 def write_summary(df, outfile):
     summary = (
         df.groupby(["Sample", "Var"], as_index=False)[["Type"]]
@@ -33,7 +45,7 @@ def plot_data(frag_size_select_df, outfile):
         frag_size_select_df["Size"], downcast="integer"
     )
     frag = frag_size_select_df[(frag_size_select_df["Size"] > 0)]
-    write_summary(frag, outfile)
+    # write_summary(frag, outfile)
     fig = plot_data_type(frag)
     return fig
 
@@ -45,14 +57,27 @@ def plot_data_type(frag):
     :param: frag pd.DataFrame -
     :param:
     """
+    print(frag)
+
+    data = []
+    for st_pair, st in SUBSTITUTION_TYPES_COMBINED:
+        st_sizes = frag[frag['Var'].isin(st_pair)]['Size']
+        data.append(st_sizes)
     geno_series = frag[frag['Var'] == 'GENOTYPE']['Size']
-    noise_series = frag[frag['Var'] == 'NOISE']['Size']
-    data = [geno_series, noise_series]
+    n_series = frag[frag['Var'] == 'N']['Size']
+    data.append(geno_series)
+    data.append(n_series)
+
+    print(data)
+
+    substitution_type_labels = [s[1] for s in SUBSTITUTION_TYPES_COMBINED]
+    labels = substitution_type_labels + ['Genotype', 'N']
+
     try:
         fig = ff.create_distplot(
             data,
-            ['Genotype', 'Noise'],
-            colors=["#556278", "#C1292E"],
+            labels,
+            # colors=COLORS,
             bin_size=.2,
             show_rug=False,
         )
@@ -72,7 +97,7 @@ def create_noisy_tlen_plot(noisy_tlen_df):
 
     :return:
     """
-    frag_size_select_df = noisy_tlen_df[["Sample", "Type", "Var", "Size"]]
+    frag_size_select_df = noisy_tlen_df[['Var', 'Size', 'Chr', 'Pos']]
 
     fig = plot_data(
         frag_size_select_df,

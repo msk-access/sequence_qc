@@ -47,6 +47,22 @@ output_columns = [
     'N',
 ]
 
+# All possible substitution types
+SUBSTITUTION_TYPES = [
+    'A>C',
+    'A>G',
+    'A>T',
+    'C>A',
+    'C>G',
+    'C>T',
+    'G>A',
+    'G>C',
+    'G>T',
+    'T>A',
+    'T>C',
+    'T>G',
+]
+
 
 def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_threshold: float, truncate: bool = True,
                     min_mapping_quality: int = 1, min_base_quality: int = 1, sample_id: str = '',
@@ -171,8 +187,8 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     st_df.to_csv(sample_id + NOISE_BY_SUBSTITUTION, sep='\t')
 
     # Noise vs genotype insert size calculation
-    noisy_positions_no_n = noisy_positions[noisy_positions['N'] == 0]
-    noisy_tlen_df = get_fragment_size_for_sample(sample_id, bam_path, sample_id, noisy_positions_no_n, True, 0, 500)
+    # noisy_positions_no_n = noisy_positions[noisy_positions['N'] == 0]
+    noisy_tlen_df = get_fragment_size_for_sample(sample_id, bam_path, sample_id, noisy_positions, 0, 500)
 
     # Make plots
     plots.all_plots(pileup_df_all, noisy_positions, st_df, noisy_tlen_df, sample_id)
@@ -231,36 +247,19 @@ def _calculate_noise_by_substitution(below_thresh_positions: pd.DataFrame, sampl
     :param sample_id: str - sample ID for first column
     :return: pd.DataFrame
     """
-
-    # All possible substitution types
-    substitution_types = [
-        'A>C',
-        'A>G',
-        'A>T',
-        'C>A',
-        'C>G',
-        'C>T',
-        'G>A',
-        'G>C',
-        'G>T',
-        'T>A',
-        'T>C',
-        'T>G',
-    ]
-
     # Alt counts for each substitution type
     st_alt_counts = {}
-    for st in substitution_types:
+    for st in SUBSTITUTION_TYPES:
         st_alt_counts[st] = 0
 
     # Genotype counts for each substitution type
     st_geno_counts = {}
-    for st in substitution_types:
+    for st in SUBSTITUTION_TYPES:
         st_geno_counts[st] = 0
 
     # Contributing sites counts for each substitution type
     st_contributing_sites = {}
-    for st in substitution_types:
+    for st in SUBSTITUTION_TYPES:
         st_contributing_sites[st] = 0
 
     for _, row in below_thresh_positions.iterrows():
