@@ -57,8 +57,6 @@ def plot_data_type(frag):
     :param: frag pd.DataFrame -
     :param:
     """
-    print(frag)
-
     data = []
     for st_pair, st in SUBSTITUTION_TYPES_COMBINED:
         st_sizes = frag[frag['Var'].isin(st_pair)]['Size']
@@ -67,8 +65,6 @@ def plot_data_type(frag):
     n_series = frag[frag['Var'] == 'N']['Size']
     data.append(geno_series)
     data.append(n_series)
-
-    print(data)
 
     substitution_type_labels = [s[1] for s in SUBSTITUTION_TYPES_COMBINED]
     labels = substitution_type_labels + ['Genotype', 'N']

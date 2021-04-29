@@ -138,9 +138,6 @@ def get_fragment_size_for_noisy_position(sample_id, bamfile, noise_pos, tag, out
                 or
                 (position_is_within_read_2 and read_2_has_n_at_position)):
 
-                print('FOUND N!')
-                print(read1.seq)
-
                 line = [sample_id, tag, read1.qname, "N", str(abs(read1.tlen)), geno_coordinate]
                 out_fh.write("\t".join(line)+ "\n")
                 continue
