@@ -25,6 +25,13 @@ def test_calculate_noise():
         0.2,
         sample_id='test_'
     )
+    # noise = calculate_noise(
+    #     os.path.join(CUR_DIR, '/Users/johnsoni/Desktop/test_bam/Homo_sapiens_assembly19.fasta'),
+    #     os.path.join(CUR_DIR, '/Users/johnsoni/Desktop/test_bam/C-XJ1562-L012-d_cl_aln_srt_MD_IR_FX_BR__aln_srt_IR_FX-duplex.bam'),
+    #     os.path.join(CUR_DIR, '/Users/johnsoni/Desktop/test_bam/MSK-ACCESS-v1_0-probe-A_no_msi_sorted_deduped.bed'),
+    #     0.02,
+    #     sample_id='C-XJ1562-L012-d_'
+    # )
     assert noise == approx(0.0048899755501162715, rel=1e-6)
 
     for filename in [
@@ -46,7 +53,7 @@ def test_noise_by_tlen():
         'test',
         os.path.join(CUR_DIR, 'test_data/SeraCare_0-5_tmp.bam'),
         'test',
-        noisy_positions, True, 0, 500
+        noisy_positions, 0, 500
     )
 
 

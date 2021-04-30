@@ -34,7 +34,7 @@ def write_summary(df, outfile):
     summary.to_csv(outfile.replace(".pdf", ".txt"), sep="\t", index=False)
 
 
-def plot_data(frag_size_select_df, outfile):
+def plot_data(frag_size_select_df):
     """
     Select data for creating plot
 
@@ -58,16 +58,20 @@ def plot_data_type(frag):
     :param:
     """
     data = []
+    labels = []
     for st_pair, st in SUBSTITUTION_TYPES_COMBINED:
         st_sizes = frag[frag['Var'].isin(st_pair)]['Size']
-        data.append(st_sizes)
+        if len(st_sizes) > 1:
+            data.append(st_sizes)
+            labels.append(st)
     geno_series = frag[frag['Var'] == 'GENOTYPE']['Size']
+    if len(geno_series) > 1:
+        data.append(geno_series)
+        labels.append('Genotype')
     n_series = frag[frag['Var'] == 'N']['Size']
-    data.append(geno_series)
-    data.append(n_series)
-
-    substitution_type_labels = [s[1] for s in SUBSTITUTION_TYPES_COMBINED]
-    labels = substitution_type_labels + ['Genotype', 'N']
+    if len(n_series) > 1:
+        data.append(n_series)
+        labels.append('N')
 
     try:
         fig = ff.create_distplot(
@@ -94,9 +98,5 @@ def create_noisy_tlen_plot(noisy_tlen_df):
     :return:
     """
     frag_size_select_df = noisy_tlen_df[['Var', 'Size', 'Chr', 'Pos']]
-
-    fig = plot_data(
-        frag_size_select_df,
-        'noise_by_tlen.pdf',
-    )
+    fig = plot_data(frag_size_select_df)
     return fig

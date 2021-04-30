@@ -113,12 +113,11 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     tlen_df_all.to_csv(sample_id + OUTPUT_TLEN_NAME, sep='\t', index=False)
 
     # Continue with calculation
-    noise = _calculate_noise_from_pileup(pileup_df_all, sample_id, noise_threshold, tlen_df_all, bam_path)
+    noise = _calculate_noise_from_pileup(pileup_df_all, sample_id, noise_threshold, bam_path)
     return noise
 
 
-def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_threshold: float,
-                                 tlen_df_all: pd.DataFrame, bam_path: str) -> float:
+def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_threshold: float, bam_path: str) -> float:
     """
     Use the pileup to determine average noise, and create noise output files
 
@@ -129,7 +128,6 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     :param pileup: pd.DataFrame - pileup of all positions and base counts from pysamstats
     :param sample_id: str - sample ID for naming outputs
     :param noise_threshold: float - Threshold past which to exclude positions from noise calculation
-    :param tlen_df_all: pd.DataFrame -
     :return: float - Single noise value for this sample
     """
     pileup_df_all = _calculate_alt_and_geno(pileup)
@@ -187,7 +185,6 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     st_df.to_csv(sample_id + NOISE_BY_SUBSTITUTION, sep='\t')
 
     # Noise vs genotype insert size calculation
-    # noisy_positions_no_n = noisy_positions[noisy_positions['N'] == 0]
     noisy_tlen_df = get_fragment_size_for_sample(sample_id, bam_path, sample_id, noisy_positions, 0, 500)
 
     # Make plots

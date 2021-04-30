@@ -77,7 +77,7 @@ def get_fragment_size_for_noisy_position(sample_id, bamfile, noise_pos, tag, out
     :param bamfile: pysam.AlignmentFile
     :param noise_pos: pd.Series - Query position, with 'chrom' and 'pos' columns
     :param tag: str
-    :pararm out_fh: filehandle
+    :param out_fh: filehandle
     :param mifs: int
     :param mafs: int
     """
