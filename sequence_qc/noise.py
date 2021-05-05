@@ -5,6 +5,7 @@ from pysam import AlignmentFile
 from pybedtools import BedTool
 
 from sequence_qc import plots
+from sequence_qc.noise_by_tlen import get_fragment_size_for_sample
 
 
 FORMAT = '%(asctime)-15s %(message)s'
@@ -14,6 +15,7 @@ logger.setLevel(logging.DEBUG)
 
 EPSILON = 1e-9
 OUTPUT_PILEUP_NAME = 'pileup.tsv'
+OUTPUT_TLEN_NAME = 'tlen.tsv'
 OUTPUT_NOISE_FILENAME = 'noise_positions.tsv'
 
 # Output files
@@ -45,6 +47,22 @@ output_columns = [
     'N',
 ]
 
+# All possible substitution types
+SUBSTITUTION_TYPES = [
+    'A>C',
+    'A>G',
+    'A>T',
+    'C>A',
+    'C>G',
+    'C>T',
+    'G>A',
+    'G>C',
+    'G>T',
+    'T>A',
+    'T>C',
+    'T>G',
+]
+
 
 def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_threshold: float, truncate: bool = True,
                     min_mapping_quality: int = 1, min_base_quality: int = 1, sample_id: str = '',
@@ -66,6 +84,7 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
     bed_file = BedTool(bed_file_path)
     bam = AlignmentFile(bam_path)
     pileup_df_all = pd.DataFrame()
+    tlen_df_all = pd.DataFrame()
 
     # Build data frame of all positions in bed file
     for region in bed_file.intervals:
@@ -77,21 +96,28 @@ def calculate_noise(ref_fasta: str, bam_path: str, bed_file_path: str, noise_thr
                                         truncate=truncate, max_depth=max_depth, min_baseq=min_base_quality,
                                         min_mapq=min_mapping_quality, stepper='nofilter')
 
+        tlen = pysamstats.load_pileup('tlen_strand', bam, chrom=chrom, start=start, end=stop, fafile=ref_fasta,
+                                        truncate=truncate, max_depth=max_depth, min_baseq=min_base_quality,
+                                        min_mapq=min_mapping_quality, stepper='nofilter')
+
         pileup_df_all = pd.concat([pileup_df_all, pd.DataFrame(pileup)])
+        tlen_df_all = pd.concat([tlen_df_all, pd.DataFrame(tlen)])
 
     # Convert bytes objects to strings so output tsv is formatted correctly
     for field in ['chrom', 'ref']:
         pileup_df_all.loc[:, field] = pileup_df_all[field].apply(lambda s: s.decode('utf-8'))
+    tlen_df_all.loc[:, 'chrom'] = tlen_df_all['chrom'].apply(lambda s: s.decode('utf-8'))
 
-    # Save the complete pileup
+    # Save the complete pileup and tlen info
     pileup_df_all[output_columns].to_csv(sample_id + OUTPUT_PILEUP_NAME, sep='\t', index=False)
+    tlen_df_all.to_csv(sample_id + OUTPUT_TLEN_NAME, sep='\t', index=False)
 
     # Continue with calculation
-    noise = _calculate_noise_from_pileup(pileup_df_all, sample_id, noise_threshold)
+    noise = _calculate_noise_from_pileup(pileup_df_all, sample_id, noise_threshold, bam_path)
     return noise
 
 
-def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_threshold: float) -> float:
+def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_threshold: float, bam_path: str) -> float:
     """
     Use the pileup to determine average noise, and create noise output files
 
@@ -102,7 +128,7 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     :param pileup: pd.DataFrame - pileup of all positions and base counts from pysamstats
     :param sample_id: str - sample ID for naming outputs
     :param noise_threshold: float - Threshold past which to exclude positions from noise calculation
-    :return: floate - Single noise value for this sample
+    :return: float - Single noise value for this sample
     """
     pileup_df_all = _calculate_alt_and_geno(pileup)
 
@@ -158,8 +184,11 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     st_df = _calculate_noise_by_substitution(below_thresh_positions, sample_id)
     st_df.to_csv(sample_id + NOISE_BY_SUBSTITUTION, sep='\t')
 
+    # Noise vs genotype insert size calculation
+    noisy_tlen_df = get_fragment_size_for_sample(sample_id, bam_path, sample_id, noisy_positions, 0, 500)
+
     # Make plots
-    plots.all_plots(pileup_df_all, noisy_positions, st_df, sample_id)
+    plots.all_plots(pileup_df_all, noisy_positions, st_df, noisy_tlen_df, sample_id)
 
     pd.DataFrame({
         SAMPLE_ID: [sample_id],
@@ -215,36 +244,19 @@ def _calculate_noise_by_substitution(below_thresh_positions: pd.DataFrame, sampl
     :param sample_id: str - sample ID for first column
     :return: pd.DataFrame
     """
-
-    # All possible substitution types
-    substitution_types = [
-        'A>C',
-        'A>G',
-        'A>T',
-        'C>A',
-        'C>G',
-        'C>T',
-        'G>A',
-        'G>C',
-        'G>T',
-        'T>A',
-        'T>C',
-        'T>G',
-    ]
-
     # Alt counts for each substitution type
     st_alt_counts = {}
-    for st in substitution_types:
+    for st in SUBSTITUTION_TYPES:
         st_alt_counts[st] = 0
 
     # Genotype counts for each substitution type
     st_geno_counts = {}
-    for st in substitution_types:
+    for st in SUBSTITUTION_TYPES:
         st_geno_counts[st] = 0
 
     # Contributing sites counts for each substitution type
     st_contributing_sites = {}
-    for st in substitution_types:
+    for st in SUBSTITUTION_TYPES:
         st_contributing_sites[st] = 0
 
     for _, row in below_thresh_positions.iterrows():
