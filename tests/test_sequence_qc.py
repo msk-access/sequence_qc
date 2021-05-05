@@ -48,7 +48,7 @@ def test_calculate_noise():
 def test_noise_by_tlen():
     """
     """
-    noisy_positions = pd.read_csv('test_data/SeraCare_noise_positions.tsv', sep='\t')
+    noisy_positions = pd.read_csv(os.path.join(CUR_DIR, 'test_data/SeraCare_noise_positions.tsv'), sep='\t')
     get_fragment_size_for_sample(
         'test',
         os.path.join(CUR_DIR, 'test_data/SeraCare_0-5_tmp.bam'),
