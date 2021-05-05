@@ -13,8 +13,8 @@ from sequence_qc import noise
                                             "the bed file (0 or 1)")
 @click.option("--min_mapq", default=1, help="Exclude reads with a lower mapping quality")
 @click.option("--min_basq", default=1, help="Exclude bases with a lower base quality")
-@click.option("--min_basq", default=30000, help="Maximum read depth for calculation")
-def calculate_noise(ref_fasta, bam_file, bed_file, sample_id, threshold, truncate, min_mapq, min_basq):
+@click.option("--max_depth", default=30000, help="Maximum read depth for calculation")
+def calculate_noise(ref_fasta, bam_file, bed_file, sample_id, threshold, truncate, min_mapq, min_basq, max_depth):
     """
     Calculate noise level of given bam file, across the given positions in `bed_file`.
     """
@@ -27,5 +27,6 @@ def calculate_noise(ref_fasta, bam_file, bed_file, sample_id, threshold, truncat
         truncate=truncate,
         min_mapping_quality=min_mapq,
         min_base_quality=min_basq,
+        max_depth=max_depth
     )
     print(sample_level_noise)
