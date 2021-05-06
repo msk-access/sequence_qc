@@ -78,12 +78,12 @@ def plot_data_type(frag):
             data,
             labels,
             # colors=COLORS,
-            bin_size=.2,
+            # bin_size=.2,
             show_rug=False,
         )
         fig.update_layout(
-            title='Fragment size distribution for noisy positions',
-            xaxis_title="TLEN",
+            title='Insert size distribution for noisy positions',
+            xaxis_title="Insert Size",
         )
     except np.linalg.LinAlgError:
         # Not enough data for plot

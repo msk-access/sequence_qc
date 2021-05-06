@@ -14,16 +14,16 @@ logger = logging.getLogger("sequence_qc")
 logger.setLevel(logging.DEBUG)
 
 EPSILON = 1e-9
-OUTPUT_PILEUP_NAME = 'pileup.tsv'
-OUTPUT_TLEN_NAME = 'tlen.tsv'
-OUTPUT_NOISE_FILENAME = 'noise_positions.tsv'
+OUTPUT_PILEUP_NAME = '_pileup.tsv'
+OUTPUT_TLEN_NAME = '_tlen.tsv'
+OUTPUT_NOISE_FILENAME = '_noise_positions.tsv'
 
 # Output files
-NOISE_ACGT = 'noise_acgt.tsv'
-NOISE_DEL = 'noise_del.tsv'
-NOISE_ACGT_INDEL = 'noise_acgt_indel.tsv'
-NOISE_N = 'noise_n.tsv'
-NOISE_BY_SUBSTITUTION = 'noise_by_substitution.tsv'
+NOISE_ACGT = '_noise_acgt.tsv'
+NOISE_DEL = '_noise_del.tsv'
+NOISE_ACGT_INDEL = '_noise_acgt_indel.tsv'
+NOISE_N = '_noise_n.tsv'
+NOISE_BY_SUBSTITUTION = '_noise_by_substitution.tsv'
 # Headers for output files
 ALT_COUNT = 'minor_allele_count'
 GENO_COUNT = 'major_allele_count'
