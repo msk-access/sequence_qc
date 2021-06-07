@@ -98,26 +98,31 @@ The module will output an HTML report with noise metrics, here is an example rep
 
 {% file src=".gitbook/assets/donor6-t\_noise.html" caption="sequence\_qc Noise.html Report \(v0.1.19\)" %}
 
-Here is a brief description each plot in the report:
+### Noise By Substitution:
 
 ![](.gitbook/assets/screen-shot-2020-09-25-at-2.59.33-pm.png)
-
-#### Noise By Substitution:
 
 * Uses the previously-defined calculation to express the noise level of this sample, for each of the 12 possible substitution types
 * Expected noise level is on the order of 10e-6 for ACCESS duplex and simplex samples
 * C&gt;T and G&gt;A noise levels are usually the highest
 
-![](.gitbook/assets/screen-shot-2020-09-25-at-2.59.43-pm.png)
+### Top noisy positions:
 
-#### Top noisy positions:
+![](.gitbook/assets/screen-shot-2020-09-25-at-2.59.43-pm.png)
 
 * The positions from the `bed_file` are sorted by those with the highest noise fraction, and the top positions' noise fractions are plotted 
 * Violin plot represents all positions from the bed file, and is expected to have most positions on the low end, with some outliers closer to the supplied threshold
 
-![](.gitbook/assets/screen-shot-2020-09-25-at-2.59.54-pm%20%281%29.png)
+### Fragment Size distribution for noisy positions:
 
-#### N Counts Histogram
+![](.gitbook/assets/screen-shot-2021-05-13-at-12.17.11-pm.png)
+
+* A histogram of fragment sizes is plotted for reads that contain a "noisy" position \(as defined previously\)
+* Substitution types can be plotted individually by clicking the legend
+
+### N Counts Histogram:
+
+![](.gitbook/assets/screen-shot-2020-09-25-at-2.59.54-pm%20%281%29.png)
 
 * Each position is counted for "N" or no-calls, and the number of positions with each N count is plotted as a histogram
 * ACCESS samples are expected to have a peak below 10 N's, although duplex and simplex samples will have a larger number of N bases than the original uncollapsed or "standard" bam files
