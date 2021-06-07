@@ -30,7 +30,7 @@ WORKDIR /app
 ADD . /app
 
 RUN apt-get update \
-  && apt-get install gcc g++ zlib1g-dev -y \
+  && apt-get install gcc g++ zlib1g-dev locales locales-all -y \
   && pip install -r requirements.txt \
   && pip install .
 
