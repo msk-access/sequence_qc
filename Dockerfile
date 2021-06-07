@@ -33,3 +33,6 @@ RUN apt-get update \
   && apt-get install gcc g++ zlib1g-dev -y \
   && pip install -r requirements.txt \
   && pip install .
+
+ENV LC_ALL=en_US.utf-8
+ENV LANG=en_US.utf-8
