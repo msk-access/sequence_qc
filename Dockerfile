@@ -34,5 +34,5 @@ RUN apt-get update \
   && pip install -r requirements.txt \
   && pip install .
 
-ENV LC_ALL=en_US.utf-8
-ENV LANG=en_US.utf-8
+ENV LC_ALL en_US.utf-8
+ENV LANG en_US.utf-8
