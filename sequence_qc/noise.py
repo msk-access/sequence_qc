@@ -187,6 +187,8 @@ def _calculate_noise_from_pileup(pileup: pd.DataFrame, sample_id: str, noise_thr
     # Noise vs genotype insert size calculation
     noisy_tlen_df = get_fragment_size_for_sample(sample_id, bam_path, sample_id, noisy_positions, 0, 500)
 
+    print(df)
+
     # Make plots
     plots.all_plots(pileup_df_all, noisy_positions, st_df, noisy_tlen_df, sample_id)
 
