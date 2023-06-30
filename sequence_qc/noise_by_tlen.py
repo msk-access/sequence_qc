@@ -53,6 +53,7 @@ def get_fragment_size_for_sample(sample_id, bam_file_path, tag, noise_df, mifs, 
     if len(noise_df.index) == 0:
         return
     for i, noise_pos in enumerate(noise_df.itertuples()):
+        print(i, noise_pos)
         get_fragment_size_for_noisy_position(sample_id, bamfile, noise_pos, tag, out_fh, mifs, mafs)
     out_fh.close()
     # Read file back in so it can be returned for plotting
