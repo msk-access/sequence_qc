@@ -97,6 +97,8 @@ def create_noisy_tlen_plot(noisy_tlen_df):
 
     :return:
     """
+    if noisy_tlen_df is None: 
+        return None
     frag_size_select_df = noisy_tlen_df[['Var', 'Size', 'Chr', 'Pos']]
     fig = plot_data(frag_size_select_df)
     return fig
