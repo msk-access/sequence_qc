@@ -1,16 +1,32 @@
-"""Console script for sequence_qc."""
-import sys
 import click
+
+from sequence_qc import noise
 
 
 @click.command()
-def main(args=None):
-    """Console script for sequence_qc."""
-    click.echo("Replace this message by putting your code into "
-               "sequence_qc.cli.main")
-    click.echo("See click documentation at https://click.palletsprojects.com/")
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())  # pragma: no cover
+@click.option("--ref_fasta", required=True, help="Path to reference fasta, containing all regions in bed_file")
+@click.option("--bam_file", required=True, help="Path to BAM file for calculating noise")
+@click.option("--bed_file", required=True, help="Path to BED file containing regions over which to calculate noise")
+@click.option("--sample_id", required=False, help="Prefix to include in all output file names")
+@click.option("--threshold", default=0.02, help="Alt allele frequency past which to ignore positions from the calculation")
+@click.option("--truncate", default=1, help="Whether to exclude trailing bases from reads that only partially overlap "
+                                            "the bed file (0 or 1)")
+@click.option("--min_mapq", default=1, help="Exclude reads with a lower mapping quality")
+@click.option("--min_basq", default=1, help="Exclude bases with a lower base quality")
+@click.option("--max_depth", default=30000, help="Maximum read depth for calculation")
+def calculate_noise(ref_fasta, bam_file, bed_file, sample_id, threshold, truncate, min_mapq, min_basq, max_depth):
+    """
+    Calculate noise level of given bam file, across the given positions in `bed_file`.
+    """
+    sample_level_noise = noise.calculate_noise(
+        ref_fasta=ref_fasta,
+        bam_path=bam_file,
+        bed_file_path=bed_file,
+        noise_threshold=threshold,
+        sample_id=sample_id,
+        truncate=truncate,
+        min_mapping_quality=min_mapq,
+        min_base_quality=min_basq,
+        max_depth=max_depth
+    )
+    print(sample_level_noise)

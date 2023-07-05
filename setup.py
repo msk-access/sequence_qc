@@ -1,24 +1,50 @@
 #!/usr/bin/env python
-
-"""The setup script."""
-
+import os
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
+
+with open('docs/README.md') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
 
-requirements = ['Click>=7.0', ]
+def req_file(filename):
+    """
+    We're using a requirements.txt file so that pyup.io can use this for security checks
 
-setup_requirements = [ ]
+    :param filename:
+    :return str:
+    """
+    with open(filename) as f:
+        content = f.readlines()
+        content = filter(lambda x: not x.startswith("#"), content)
+    return [x.strip() for x in content]
 
-test_requirements = [ ]
+
+def get_package_files(file_type):
+    """
+    helper function to recursively extract specific file types from the repository.
+
+    :param directory, file_type:
+    :return str:
+    """
+    paths = []
+    for (path, directories, filenames) in os.walk(
+        os.path.dirname(os.path.abspath(__file__))
+    ):
+        for filename in filenames:
+            if not filename.endswith(file_type):
+                continue
+            paths.append(os.path.join("..", path, filename))
+    return paths
+
+
+with open(os.path.join(os.path.dirname(__file__), "sequence_qc/VERSION"), "r") as fh:
+    __version__ = fh.read().strip()
+
 
 setup(
-    author="Ronak Shah",
-    author_email='rons.shah@gmail.com',
+    author="Ian Johnson",
+    author_email='ionox0@gmail.com',
     python_requires='>=3.5',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
@@ -31,23 +57,24 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    description="Package for doing various ad-hock quality control steps from MSK-ACCESS generated FASTQ or BAM files",
+    description="Package for doing various ad-hoc quality control steps from MSK-ACCESS generated FASTQ or BAM files",
     entry_points={
         'console_scripts': [
-            'sequence_qc=sequence_qc.cli:main',
+            'calculate_noise=sequence_qc.cli:calculate_noise',
         ],
     },
-    install_requires=requirements,
+    install_requires=req_file("requirements.txt"),
     license="Apache Software License 2.0",
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
     include_package_data=True,
     keywords='sequence_qc',
     name='sequence_qc',
     packages=find_packages(include=['sequence_qc', 'sequence_qc.*']),
-    setup_requires=setup_requirements,
+    package_data={
+        "": ['requirements.txt', 'requirements_dev.txt'],
+    },
     test_suite='tests',
-    tests_require=test_requirements,
-    url='https://github.com/rhshah/sequence_qc',
-    version='0.1.0',
+    url='https://github.com/msk-access/sequence_qc',
+    version=__version__,
     zip_safe=False,
 )
