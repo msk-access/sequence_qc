@@ -1,6 +1,6 @@
 ################## BASE IMAGE ######################
 
-FROM python:3.6-slim
+FROM python:3.8-slim
 
 ################## ARGUMENTS/Environments ##########
 
@@ -11,7 +11,7 @@ ARG SEQUENCE_QC_VERSION
 ARG VCS_REF
 ################## METADATA ########################
 LABEL org.opencontainers.image.vendor="MSKCC"
-LABEL org.opencontainers.image.authors="Charlie Murphy (murphyc4@mskcc.org)"
+LABEL org.opencontainers.image.authors="Ronak Shah (shahr2@mskcc.org)"
 
 LABEL org.opencontainers.image.created=${BUILD_DATE} \
     org.opencontainers.image.version=${BUILD_VERSION} \
@@ -21,7 +21,7 @@ LABEL org.opencontainers.image.created=${BUILD_DATE} \
     org.opencontainers.image.vcs-url="https://github.com/msk-access/sequence_qc.git" \
     org.opencontainers.image.vcs-ref=${VCS_REF}
 
-LABEL org.opencontainers.image.description="This container uses python3.6 as the base image to build \
+LABEL org.opencontainers.image.description="This container uses python3.8 as the base image to build \
     sequence_qc version ${SEQUENCE_QC_VERSION}"
 
 ################## INSTALL ##########################
