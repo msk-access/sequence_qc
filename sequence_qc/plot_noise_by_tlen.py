@@ -85,7 +85,7 @@ def plot_data_type(frag):
             title='Insert size distribution for noisy positions',
             xaxis_title="Insert Size",
         )
-    except np.linalg.LinAlgError:
+    except (np.linalg.LinAlgError, AttributeError) as e:
         # Not enough data for plot
         return None
     return fig
@@ -97,7 +97,7 @@ def create_noisy_tlen_plot(noisy_tlen_df):
 
     :return:
     """
-    if noisy_tlen_df is None: 
+    if noisy_tlen_df is None:
         return None
     frag_size_select_df = noisy_tlen_df[['Var', 'Size', 'Chr', 'Pos']]
     fig = plot_data(frag_size_select_df)
