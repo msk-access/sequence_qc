@@ -33,13 +33,12 @@ def test_calculate_noise():
     #     sample_id='C-XJ1562-L012-d_'
     # )
     assert noise == approx(0.0048899755501162715, rel=1e-6)
-
     for filename in [
             'test_' + OUTPUT_PILEUP_NAME,
             'test_' + OUTPUT_NOISE_FILENAME,
-            'test_noise_acgt.tsv',
-            'test_noise_del.tsv',
-            'test_noise_n.tsv',
+            'test__noise_acgt.tsv',
+            'test__noise_del.tsv',
+            'test__noise_n.tsv',
     ]:
         assert os.path.exists(filename)
         os.unlink(filename)
