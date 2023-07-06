@@ -5,4 +5,4 @@ click==7.1.2
 pysamstats==1.1.2
 pandas
 plotly
-scipy==1.5.0
+scipy==1.10.0
