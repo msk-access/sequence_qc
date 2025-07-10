@@ -45,14 +45,13 @@ with open(os.path.join(os.path.dirname(__file__), "sequence_qc/VERSION"), "r") a
 setup(
     author="Ian Johnson",
     author_email='ionox0@gmail.com',
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
     description="Package for doing various ad-hoc quality control steps from MSK-ACCESS generated FASTQ or BAM files",
